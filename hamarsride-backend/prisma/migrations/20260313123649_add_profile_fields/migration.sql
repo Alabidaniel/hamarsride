@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `altPhone` VARCHAR(191) NULL,
+    ADD COLUMN `dateOfBirth` DATETIME(3) NULL,
+    ADD COLUMN `gender` VARCHAR(191) NULL;

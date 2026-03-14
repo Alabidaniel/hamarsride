@@ -1,0 +1,7 @@
+{
+  "name": "hamarsride-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./start-dev.ps1"
+  }
+}

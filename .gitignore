@@ -1,0 +1,13 @@
+# Root ignore
+.env
+.env.*
+serviceAccountKey.json
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
