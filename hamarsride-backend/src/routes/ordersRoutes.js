@@ -134,6 +134,10 @@ router.post("/", async (req, res, next) => {
       include: { items: true },
     });
 
+    await prisma.cartItem.deleteMany({
+      where: { userId: user.id },
+    });
+
     await createNotification({
       userId: user.id,
       title: "Order pending",
@@ -219,3 +223,4 @@ router.post("/:id/cancel", async (req, res, next) => {
 });
 
 module.exports = router;
+

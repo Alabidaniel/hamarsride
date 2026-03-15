@@ -1,84 +1,99 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Bell,
   ClipboardList,
   CreditCard,
   Clock3,
   Truck,
+  CheckCircle2,
 } from "lucide-react";
 import NavbarMain from "../components/NavbarMain";
 import Footer from "../components/Footer";
-
-const ADMIN_ORDERS_KEY = "hamarsrideAdminOrders";
-const ADMIN_NOTIFICATIONS_KEY = "hamarsrideAdminNotifications";
-
-const safeRead = (key) => {
-  try {
-    return JSON.parse(localStorage.getItem(key) || "[]");
-  } catch (_error) {
-    return [];
-  }
-};
+import { apiFetch } from "../src/services/apiClient";
 
 const statusLabel = {
-  payment_submitted: "Payment Submitted",
-  payment_verified: "Payment Verified",
+  pending: "Pending",
+  accepted: "Accepted",
   processing: "Processing",
+  picked_up: "Picked Up",
   delivered: "Delivered",
+  cancelled: "Cancelled",
 };
 
 const statusClass = {
-  payment_submitted: "bg-amber-100 text-amber-700",
-  payment_verified: "bg-blue-100 text-blue-700",
+  pending: "bg-gray-100 text-gray-700",
+  accepted: "bg-blue-100 text-blue-700",
   processing: "bg-orange-100 text-orange-700",
+  picked_up: "bg-amber-100 text-amber-700",
   delivered: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-700",
 };
 
 export default function AdminDashboard() {
-  const [orders, setOrders] = useState(() => safeRead(ADMIN_ORDERS_KEY));
-  const [notifications, setNotifications] = useState(() => safeRead(ADMIN_NOTIFICATIONS_KEY));
+  const [orders, setOrders] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
 
   const unreadCount = notifications.filter((item) => !item.read).length;
   const stats = useMemo(
     () => ({
       totalOrders: orders.length,
-      awaitingPaymentReview: orders.filter((item) => item.status === "payment_submitted").length,
+      awaitingPaymentReview: orders.filter((item) => item.status === "pending").length,
       inProgress: orders.filter((item) => item.status === "processing").length,
       delivered: orders.filter((item) => item.status === "delivered").length,
     }),
     [orders]
   );
 
-  const persistOrders = (nextOrders) => {
-    setOrders(nextOrders);
-    localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify(nextOrders));
-  };
-
-  const persistNotifications = (nextNotifications) => {
-    setNotifications(nextNotifications);
-    localStorage.setItem(ADMIN_NOTIFICATIONS_KEY, JSON.stringify(nextNotifications));
-  };
-
-  const updateOrderStatus = (orderId, nextStatus) => {
-    const nextOrders = orders.map((item) =>
-      item.id === orderId ? { ...item, status: nextStatus } : item
-    );
-    persistOrders(nextOrders);
-
-    const notice = {
-      id: `${Date.now()}`,
-      title: "Order Status Updated",
-      message: `Order ${orderId} moved to ${statusLabel[nextStatus]}.`,
-      read: false,
-      createdAt: new Date().toISOString(),
-      orderId,
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+        const payload = await apiFetch("/admin/orders");
+        setOrders(payload.orders || []);
+      } catch (err) {
+        setError(err.message || "Failed to load admin orders.");
+      } finally {
+        setIsLoading(false);
+      }
     };
-    persistNotifications([notice, ...notifications]);
+
+    loadOrders();
+  }, []);
+
+  const updateOrderStatus = async (orderId, nextStatus) => {
+    try {
+      setUpdatingId(orderId);
+      const payload = await apiFetch(`/admin/orders/${orderId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      const updated = payload.order;
+      setOrders((prev) =>
+        prev.map((item) => (item.id === updated.id ? updated : item))
+      );
+
+      const notice = {
+        id: `${Date.now()}`,
+        title: "Order Status Updated",
+        message: `Order ${orderId} moved to ${statusLabel[nextStatus]}.`,
+        read: false,
+        createdAt: new Date().toISOString(),
+      };
+      setNotifications((prev) => [notice, ...prev]);
+    } catch (err) {
+      setError(err.message || "Failed to update order status.");
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const markAllRead = () => {
-    const next = notifications.map((item) => ({ ...item, read: true }));
-    persistNotifications(next);
+    setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
   };
 
   return (
@@ -90,7 +105,7 @@ export default function AdminDashboard() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Monitor payments, manage orders, and respond to incoming activity.
+              Monitor orders and manage status updates.
             </p>
           </div>
           <div className="text-xs px-3 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">
@@ -98,9 +113,15 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {error ? (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard icon={ClipboardList} label="Total Orders" value={stats.totalOrders} />
-          <StatCard icon={CreditCard} label="Awaiting Review" value={stats.awaitingPaymentReview} />
+          <StatCard icon={CreditCard} label="Pending" value={stats.awaitingPaymentReview} />
           <StatCard icon={Clock3} label="Processing" value={stats.inProgress} />
           <StatCard icon={Truck} label="Delivered" value={stats.delivered} />
         </div>
@@ -109,9 +130,13 @@ export default function AdminDashboard() {
           <section className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Incoming Orders</h2>
 
-            {orders.length === 0 ? (
+            {isLoading ? (
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
-                No payment submissions yet.
+                Loading orders...
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center text-gray-500 text-sm">
+                No orders yet.
               </div>
             ) : (
               <div className="space-y-4">
@@ -121,51 +146,70 @@ export default function AdminDashboard() {
                       <div>
                         <p className="font-semibold text-gray-900">{order.id}</p>
                         <p className="text-xs text-gray-500">
-                          {new Date(order.createdAt).toLocaleString()}
+                          {order.createdAt ? new Date(order.createdAt).toLocaleString() : "-"}
                         </p>
                       </div>
-                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusClass[order.status]}`}>
-                        {statusLabel[order.status]}
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusClass[order.status] || "bg-gray-100 text-gray-700"}`}>
+                        {statusLabel[order.status] || order.status}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 text-sm text-gray-700">
                       <p>
-                        <span className="font-medium">Customer:</span> {order.customerName}
+                        <span className="font-medium">Customer:</span> {order.user?.name || "-"}
                       </p>
                       <p>
-                        <span className="font-medium">Amount:</span> N{Number(order.amount || 0).toLocaleString()}
+                        <span className="font-medium">Email:</span> {order.user?.email || "-"}
+                      </p>
+                      <p>
+                        <span className="font-medium">Total:</span> N{Number(order.total || 0).toLocaleString()}
+                      </p>
+                      <p>
+                        <span className="font-medium">Status:</span> {statusLabel[order.status] || order.status}
                       </p>
                       <p className="sm:col-span-2">
                         <span className="font-medium">Address:</span> {order.address}
                       </p>
                       <p className="sm:col-span-2">
-                        <span className="font-medium">Instruction:</span>{" "}
-                        {order.instruction || "No instruction"}
-                      </p>
-                      <p className="sm:col-span-2">
-                        <span className="font-medium">Receipt:</span> {order.receiptName}
+                        <span className="font-medium">Instruction:</span> {order.instruction || "No instruction"}
                       </p>
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
-                        onClick={() => updateOrderStatus(order.id, "payment_verified")}
-                        className="px-3 py-2 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+                        onClick={() => updateOrderStatus(order.id, "accepted")}
+                        className="px-3 py-2 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-60"
+                        disabled={updatingId === order.id}
                       >
-                        Verify Payment
+                        Accept
                       </button>
                       <button
                         onClick={() => updateOrderStatus(order.id, "processing")}
-                        className="px-3 py-2 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition"
+                        className="px-3 py-2 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition disabled:opacity-60"
+                        disabled={updatingId === order.id}
                       >
-                        Mark Processing
+                        Processing
+                      </button>
+                      <button
+                        onClick={() => updateOrderStatus(order.id, "picked_up")}
+                        className="px-3 py-2 text-xs rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition disabled:opacity-60"
+                        disabled={updatingId === order.id}
+                      >
+                        Picked Up
                       </button>
                       <button
                         onClick={() => updateOrderStatus(order.id, "delivered")}
-                        className="px-3 py-2 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
+                        className="px-3 py-2 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-60"
+                        disabled={updatingId === order.id}
                       >
-                        Mark Delivered
+                        Delivered
+                      </button>
+                      <button
+                        onClick={() => updateOrderStatus(order.id, "cancelled")}
+                        className="px-3 py-2 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60"
+                        disabled={updatingId === order.id}
+                      >
+                        Cancel
                       </button>
                     </div>
                   </article>

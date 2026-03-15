@@ -336,6 +336,7 @@ export default function SignupPage() {
             </div>
           </div>
 
+
           <div className="flex items-start gap-2 text-sm text-orange-100">
             <input
               id="acceptTerms"

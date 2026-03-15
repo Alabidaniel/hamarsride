@@ -9,6 +9,7 @@ const restaurantsRoutes = require("./routes/restaurantsRoutes");
 const ordersRoutes = require("./routes/ordersRoutes");
 const adminOrdersRoutes = require("./routes/adminOrdersRoutes");
 const notificationsRoutes = require("./routes/notificationsRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const { initFirebase } = require("./config/firebase");
 
@@ -32,6 +33,7 @@ app.use("/restaurants", restaurantsRoutes);
 app.use("/orders", ordersRoutes);
 app.use("/admin/orders", adminOrdersRoutes);
 app.use("/notifications", notificationsRoutes);
+app.use("/cart", cartRoutes);
 
 app.use(errorHandler);
 

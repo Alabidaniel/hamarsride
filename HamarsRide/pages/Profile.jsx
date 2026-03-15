@@ -13,6 +13,8 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
   const resolvePhotoUrl = (value) => {
     if (!value) return "";
     if (value.startsWith("http")) return value;
@@ -22,10 +24,13 @@ export default function Profile() {
   useEffect(() => {
     const loadAddresses = async () => {
       try {
+        setIsLoadingAddresses(true);
         const payload = await apiFetch("/addresses");
         setAddresses(payload.addresses || []);
       } catch (err) {
         setError(err.message || "Failed to load addresses.");
+      } finally {
+        setIsLoadingAddresses(false);
       }
     };
 
@@ -35,10 +40,13 @@ export default function Profile() {
   useEffect(() => {
     const loadProfile = async () => {
       try {
+        setIsLoadingProfile(true);
         const payload = await apiFetch("/me");
         setProfile(payload.user);
-      } catch (_err) {
-        // ignore
+      } catch (err) {
+        setError(err.message || "Failed to load profile.");
+      } finally {
+        setIsLoadingProfile(false);
       }
     };
     loadProfile();
@@ -71,7 +79,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      
+
       {/* ================= NAVBAR ================= */}
      <NavbarMain />
       {/* ================= MAIN CONTENT ================= */}
@@ -81,6 +89,12 @@ export default function Profile() {
         <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-8">
           My Profile
         </h1>
+
+        {error ? (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
 
         {/* ================= PROFILE CARD ================= */}
         <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 mb-10 flex flex-col lg:flex-row justify-between lg:items-center gap-6">
@@ -94,6 +108,8 @@ export default function Profile() {
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
+              ) : isLoadingProfile ? (
+                "Loading"
               ) : (
                 "Photo"
               )}
@@ -102,7 +118,7 @@ export default function Profile() {
             {/* User Info */}
             <div>
               <h2 className="text-xl font-semibold text-gray-800">
-                {profile?.name || "User"}
+                {isLoadingProfile ? "Loading..." : profile?.name || "User"}
               </h2>
               <p className="text-gray-600">{profile?.email || "email@domain.com"}</p>
               <p className="text-gray-600">{profile?.phone || "+234 800 000 0000"}</p>
@@ -113,7 +129,10 @@ export default function Profile() {
           </div>
 
           {/* Edit Button */}
-          <button onClick={() => navigate('/EditProfile')} className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl shadow-sm transition">
+          <button
+            onClick={() => navigate('/EditProfile')}
+            className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl shadow-sm transition"
+          >
             Edit Profile
           </button>
         </div>
@@ -135,13 +154,13 @@ export default function Profile() {
 
           {/* Address Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {error ? (
-            <div className="col-span-full text-sm text-red-600">{error}</div>
+          {isLoadingAddresses ? (
+            <div className="col-span-full text-sm text-gray-500">Loading addresses...</div>
           ) : null}
-          {addresses.length === 0 ? (
+          {addresses.length === 0 && !isLoadingAddresses ? (
             <div className="col-span-full text-sm text-gray-500">No saved addresses yet.</div>
           ) : null}
-            
+
           {addresses.map((item) => (
             <div key={item.id} className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition">
               <h3 className="font-semibold text-gray-800">{item.label}</h3>

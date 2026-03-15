@@ -15,6 +15,7 @@ export default function AddNewAddress() {
     isDefault: false,
   });
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -34,6 +35,7 @@ export default function AddNewAddress() {
     }
 
     try {
+      setIsSaving(true);
       await apiFetch("/addresses", {
         method: "POST",
         body: JSON.stringify({
@@ -46,6 +48,8 @@ export default function AddNewAddress() {
       navigate("/profile");
     } catch (err) {
       setError(err.message || "Failed to save address.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -147,9 +151,10 @@ export default function AddNewAddress() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 type="submit"
-                className="bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-700 transition"
+                className="bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-700 transition disabled:opacity-60"
+                disabled={isSaving}
               >
-                Save Address
+                {isSaving ? "Saving..." : "Save Address"}
               </button>
               <button
                 type="button"

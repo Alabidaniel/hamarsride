@@ -13,6 +13,8 @@ export default function Dashboard() {
   const [activeOrder, setActiveOrder] = useState(null);
   const [isLoadingActive, setIsLoadingActive] = useState(true);
   const [activeError, setActiveError] = useState("");
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
   const categories = [
     "Amala",
     "Pizza",
@@ -52,6 +54,25 @@ export default function Dashboard() {
       }
     };
 
+    const loadRecentOrders = async () => {
+      try {
+        setIsLoadingOrders(true);
+        const payload = await apiFetch("/orders");
+        if (isMounted) {
+          setRecentOrders(payload.orders || []);
+        }
+      } catch (err) {
+        console.error("Recent orders error:", err);
+        if (isMounted) {
+          setRecentOrders([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingOrders(false);
+        }
+      }
+    };
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!isMounted) return;
       if (!user) {
@@ -60,6 +81,7 @@ export default function Dashboard() {
         return;
       }
       loadActiveOrder();
+      loadRecentOrders();
     });
 
     return () => {
@@ -105,6 +127,16 @@ export default function Dashboard() {
       currentIndex: current.index,
     };
   }, [activeOrder]);
+
+  const statusBadge = (status) => {
+    const value = (status || "pending").toLowerCase();
+    if (value === "delivered") return "bg-green-100 text-green-600";
+    if (value === "cancelled") return "bg-red-100 text-red-600";
+    if (value === "processing" || value === "accepted" || value === "picked_up") {
+      return "bg-orange-100 text-orange-600";
+    }
+    return "bg-gray-100 text-gray-600";
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 sm:p-6">
@@ -174,41 +206,37 @@ export default function Dashboard() {
             {/* RECENT ORDERS */}
             <div className="bg-white rounded-2xl p-4 sm:p-6 overflow-x-auto">
               <h2 className="font-semibold mb-4 text-lg">Recent Orders</h2>
+              {isLoadingOrders ? (
+                <div className="text-sm text-gray-500">Loading orders...</div>
+              ) : recentOrders.length === 0 ? (
+                <div className="text-sm text-gray-500">No orders yet.</div>
+              ) : (
+                <table className="w-full text-sm min-w-[500px] sm:min-w-full">
+                  <thead className="text-gray-500">
+                    <tr>
+                      <th className="px-2 py-1">Order ID</th>
+                      <th className="px-2 py-1">Pickup Location</th>
+                      <th className="px-2 py-1">Drop-off Location</th>
+                      <th className="px-2 py-1">Status</th>
+                    </tr>
+                  </thead>
 
-              <table className="w-full text-sm min-w-[500px] sm:min-w-full">
-                <thead className="text-gray-500">
-                  <tr>
-                    <th className="px-2 py-1">Order ID</th>
-                    <th className="px-2 py-1">Pickup Location</th>
-                    <th className="px-2 py-1">Drop-off Location</th>
-                    <th className="px-2 py-1">Status</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr className="text-center">
-                    <td>HMR789</td>
-                    <td>Lekki Phase 1</td>
-                    <td>Victoria Island</td>
-                    <td>
-                      <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full">
-                        Delivered
-                      </span>
-                    </td>
-                  </tr>
-
-                  <tr className="text-center">
-                    <td>HMR788</td>
-                    <td>Ikee GRA</td>
-                    <td>Festac Town</td>
-                    <td>
-                      <span className="text-orange-500 font-semibold">
-                        Pending
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr key={order.id} className="text-center">
+                        <td>{order.id}</td>
+                        <td>{order.pickup || "—"}</td>
+                        <td>{order.dropoff || "—"}</td>
+                        <td>
+                          <span className={`px-3 py-1 rounded-full ${statusBadge(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 
@@ -333,9 +361,3 @@ function FoodCard({ title, fee, img }) {
     </div>
   );
 }
-
-
-
-
-
-

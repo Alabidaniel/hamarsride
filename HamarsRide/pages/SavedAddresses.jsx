@@ -8,19 +8,52 @@ export default function SavedAddresses() {
   const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const loadAddresses = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const payload = await apiFetch("/addresses");
+      setAddresses(payload.addresses || []);
+    } catch (err) {
+      setError(err.message || "Failed to load addresses.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadAddresses = async () => {
-      try {
-        const payload = await apiFetch("/addresses");
-        setAddresses(payload.addresses || []);
-      } catch (err) {
-        setError(err.message || "Failed to load addresses.");
-      }
-    };
-
     loadAddresses();
   }, []);
+
+  const setDefaultAddress = async (id) => {
+    try {
+      setUpdatingId(id);
+      await apiFetch(`/addresses/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isDefault: true }),
+      });
+      await loadAddresses();
+    } catch (err) {
+      setError(err.message || "Failed to update address.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const deleteAddress = async (id) => {
+    try {
+      setUpdatingId(id);
+      await apiFetch(`/addresses/${id}`, { method: "DELETE" });
+      setAddresses((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      setError(err.message || "Failed to delete address.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -45,7 +78,9 @@ export default function SavedAddresses() {
             {error ? (
               <div className="col-span-full text-sm text-red-600">{error}</div>
             ) : null}
-            {addresses.length === 0 ? (
+            {isLoading ? (
+              <div className="col-span-full text-sm text-gray-500">Loading addresses...</div>
+            ) : addresses.length === 0 ? (
               <div className="col-span-full text-sm text-gray-500">No saved addresses yet.</div>
             ) : null}
             {addresses.map((item) => (
@@ -53,8 +88,40 @@ export default function SavedAddresses() {
                 key={item.id}
                 className="bg-gray-50 border border-gray-200 rounded-xl p-5 hover:border-orange-300 transition"
               >
-                <p className="font-semibold text-gray-900">{item.label}</p>
-                <p className="text-sm text-gray-600 mt-1">{item.details}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-semibold text-gray-900 flex items-center gap-2">
+                      {item.label}
+                      {item.isDefault ? (
+                        <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                          Default
+                        </span>
+                      ) : null}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">{item.details}</p>
+                    {item.notes ? (
+                      <p className="text-xs text-gray-500 mt-1">{item.notes}</p>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {!item.isDefault ? (
+                    <button
+                      onClick={() => setDefaultAddress(item.id)}
+                      className="px-3 py-2 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition disabled:opacity-60"
+                      disabled={updatingId === item.id}
+                    >
+                      Set Default
+                    </button>
+                  ) : null}
+                  <button
+                    onClick={() => deleteAddress(item.id)}
+                    className="px-3 py-2 text-xs rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition disabled:opacity-60"
+                    disabled={updatingId === item.id}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

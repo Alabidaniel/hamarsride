@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Star, Clock, Plus, Minus } from "lucide-react";
 import Footer from "../components/Footer";
 import NavbarMain from "../components/NavbarMain";
@@ -11,6 +11,7 @@ export default function RestaurantDetails() {
   const [menuItems, setMenuItems] = useState([]);
   const [error, setError] = useState("");
   const [cart, setCart] = useState({});
+  const [isAddingId, setIsAddingId] = useState(null);
   const navigate = useNavigate();
   const restaurantId = id;
 
@@ -28,6 +29,85 @@ export default function RestaurantDetails() {
     load();
   }, [restaurantId]);
 
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const payload = await apiFetch("/cart");
+        const items = payload.items || [];
+        const next = items.reduce((acc, item) => {
+          acc[item.id] = item.quantity;
+          return acc;
+        }, {});
+        setCart(next);
+      } catch (_err) {
+        // ignore cart load issues here
+      }
+    };
+    loadCart();
+  }, []);
+
+  const cartByMenuItem = useMemo(() => {
+    const map = {};
+    menuItems.forEach((item) => {
+      map[item.id] = cart[item.id] || 0;
+    });
+    return map;
+  }, [cart, menuItems]);
+
+  const addToCart = async (item) => {
+    try {
+      setIsAddingId(item.id);
+      const payload = await apiFetch("/cart/items", {
+        method: "POST",
+        body: JSON.stringify({ menuItemId: item.id, quantity: 1 }),
+      });
+
+      if (payload?.item) {
+        setCart((prev) => ({
+          ...prev,
+          [item.id]: payload.item.quantity,
+        }));
+      } else {
+        setCart((prev) => ({
+          ...prev,
+          [item.id]: (prev[item.id] || 0) + 1,
+        }));
+      }
+    } catch (err) {
+      setError(err.message || "Failed to add item to cart.");
+    } finally {
+      setIsAddingId(null);
+    }
+  };
+
+  const removeFromCart = async (item) => {
+    try {
+      if (!cart[item.id]) return;
+      setIsAddingId(item.id);
+
+      const nextQty = Math.max((cart[item.id] || 0) - 1, 0);
+
+      const payload = await apiFetch(`/cart/items/${item.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ quantity: nextQty }),
+      });
+
+      if (!payload) {
+        setCart((prev) => ({ ...prev, [item.id]: 0 }));
+        return;
+      }
+
+      setCart((prev) => ({
+        ...prev,
+        [item.id]: payload.item.quantity,
+      }));
+    } catch (err) {
+      setError(err.message || "Failed to update cart.");
+    } finally {
+      setIsAddingId(null);
+    }
+  };
+
   if (error) {
     return (
       <div className="p-20 text-center text-red-600">
@@ -44,23 +124,9 @@ export default function RestaurantDetails() {
     );
   }
 
-  const addToCart = (item) => {
-    setCart((prev) => ({
-      ...prev,
-      [item.id]: (prev[item.id] || 0) + 1,
-    }));
-  };
-
-  const removeFromCart = (item) => {
-    setCart((prev) => ({
-      ...prev,
-      [item.id]: Math.max((prev[item.id] || 0) - 1, 0),
-    }));
-  };
-
-  const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+  const totalItems = Object.values(cartByMenuItem).reduce((a, b) => a + b, 0);
   const totalPrice = menuItems.reduce(
-    (total, item) => total + (cart[item.id] || 0) * item.price,
+    (total, item) => total + (cartByMenuItem[item.id] || 0) * item.price,
     0
   );
 
@@ -143,20 +209,22 @@ export default function RestaurantDetails() {
                     ₦{item.price.toLocaleString()}
                   </p>
 
-                  {cart[item.id] ? (
+                  {cartByMenuItem[item.id] ? (
                     <div className="flex items-center gap-3 mt-4">
                       <button
                         onClick={() => removeFromCart(item)}
-                        className="bg-gray-200 p-2 rounded-full"
+                        className="bg-gray-200 p-2 rounded-full disabled:opacity-60"
+                        disabled={isAddingId === item.id}
                       >
                         <Minus size={14} />
                       </button>
 
-                      <span>{cart[item.id]}</span>
+                      <span>{cartByMenuItem[item.id]}</span>
 
                       <button
                         onClick={() => addToCart(item)}
-                        className="bg-orange-500 text-white p-2 rounded-full"
+                        className="bg-orange-500 text-white p-2 rounded-full disabled:opacity-60"
+                        disabled={isAddingId === item.id}
                       >
                         <Plus size={14} />
                       </button>
@@ -164,9 +232,10 @@ export default function RestaurantDetails() {
                   ) : (
                     <button
                       onClick={() => addToCart(item)}
-                      className="mt-4 bg-orange-500 text-white px-5 py-2 rounded-full text-sm hover:bg-orange-600 transition"
+                      className="mt-4 bg-orange-500 text-white px-5 py-2 rounded-full text-sm hover:bg-orange-600 transition disabled:opacity-60"
+                      disabled={isAddingId === item.id}
                     >
-                      Add to Cart
+                      {isAddingId === item.id ? "Adding..." : "Add to Cart"}
                     </button>
                   )}
                 </div>

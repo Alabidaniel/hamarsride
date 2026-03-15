@@ -22,6 +22,8 @@ const EditProfile = () => {
   const [addresses, setAddresses] = useState([]);
   const [error, setError] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
   const fileInputRef = useRef(null);
   const [showCrop, setShowCrop] = useState(false);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -32,10 +34,13 @@ const EditProfile = () => {
   useEffect(() => {
     const loadAddresses = async () => {
       try {
+        setIsLoadingAddresses(true);
         const payload = await apiFetch("/addresses");
         setAddresses(payload.addresses || []);
       } catch (err) {
         setError(err.message || "Failed to load addresses.");
+      } finally {
+        setIsLoadingAddresses(false);
       }
     };
     loadAddresses();
@@ -44,6 +49,7 @@ const EditProfile = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
+        setIsLoadingProfile(true);
         const payload = await apiFetch("/me");
         setForm((prev) => ({
           ...prev,
@@ -59,6 +65,8 @@ const EditProfile = () => {
         setPhotoUrl(payload.user?.photoUrl || "");
       } catch (err) {
         setError(err.message || "Failed to load profile.");
+      } finally {
+        setIsLoadingProfile(false);
       }
     };
     loadProfile();
@@ -190,7 +198,7 @@ const EditProfile = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-[Poppins] text-gray-800">
-      
+
       {/* ================= NAVBAR ================= */}
         <NavbarMain />
 
@@ -205,6 +213,18 @@ const EditProfile = () => {
       {/* ================= MAIN CARD ================= */}
       <div className="max-w-3xl mx-auto px-6 py-8">
         <div className="bg-white rounded-3xl shadow-md p-8 space-y-10">
+
+          {error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          ) : null}
+
+          {isLoadingProfile ? (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+              Loading profile...
+            </div>
+          ) : null}
 
           {/* ===== PROFILE PHOTO SECTION ===== */}
           <div className="flex flex-col items-center space-y-3">
@@ -337,10 +357,9 @@ const EditProfile = () => {
               <h2 className="text-lg font-semibold">Saved Addresses</h2>
 
               <div className="space-y-4">
-                {error ? (
-                  <div className="text-sm text-red-600">{error}</div>
-                ) : null}
-                {addresses.length === 0 ? (
+                {isLoadingAddresses ? (
+                  <div className="text-sm text-gray-500">Loading addresses...</div>
+                ) : addresses.length === 0 ? (
                   <div className="text-sm text-gray-500">No saved addresses yet.</div>
                 ) : null}
                 {addresses.map((item) => (
@@ -387,6 +406,7 @@ const EditProfile = () => {
               <button
                 type="submit"
                 className="w-full bg-orange-600 text-white py-3 rounded-xl font-semibold hover:bg-orange-700 transition shadow-md"
+                disabled={isLoadingProfile}
               >
                 Save Changes
               </button>
@@ -400,12 +420,6 @@ const EditProfile = () => {
             </div>
 
             {/* ===== SUCCESS MESSAGE ===== */}
-            {error ? (
-              <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                {error}
-              </div>
-            ) : null}
-
             {success && (
               <div className="mt-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
                 Profile updated successfully

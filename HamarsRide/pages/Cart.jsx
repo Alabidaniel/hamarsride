@@ -1,61 +1,84 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NavbarMain from "../components/NavbarMain";
 import Footer from "../components/Footer";
+import { apiFetch } from "../src/services/apiClient";
 
 const Cart = () => {
   const navigate = useNavigate();
-
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Grilled Chicken Burger",
-      price: 4500,
-      quantity: 1,
-      image:
-        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200",
-    },
-    {
-      id: 2,
-      name: "Jollof Rice & Chicken",
-      price: 3800,
-      quantity: 2,
-      image:
-        "https://images.unsplash.com/photo-1604908554027-5c6a8c3b8a4e?w=200",
-    },
-  ]);
+  const [cartItems, setCartItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [updatingItemId, setUpdatingItemId] = useState(null);
 
   const deliveryFee = 1500;
 
-  const increaseQty = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+  const loadCart = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const payload = await apiFetch("/cart");
+      setCartItems(payload.items || []);
+    } catch (err) {
+      setError(err.message || "Failed to load cart.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const decreaseQty = (id) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  const updateQuantity = async (item, nextQty) => {
+    try {
+      setUpdatingItemId(item.id);
+      const response = await apiFetch(`/cart/items/${item.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ quantity: nextQty }),
+      });
+
+      if (!response) {
+        setCartItems((items) => items.filter((entry) => entry.id !== item.id));
+        return;
+      }
+
+      setCartItems((items) =>
+        items.map((entry) => (entry.id === item.id ? response.item : entry))
+      );
+    } catch (err) {
+      setError(err.message || "Failed to update cart item.");
+    } finally {
+      setUpdatingItemId(null);
+    }
   };
 
-  const removeItem = (id) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  const increaseQty = (item) => updateQuantity(item, item.quantity + 1);
+
+  const decreaseQty = (item) => {
+    const nextQty = item.quantity - 1;
+    updateQuantity(item, nextQty);
   };
 
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
+  const removeItem = async (item) => {
+    try {
+      setUpdatingItemId(item.id);
+      await apiFetch(`/cart/items/${item.id}`, { method: "DELETE" });
+      setCartItems((items) => items.filter((entry) => entry.id !== item.id));
+    } catch (err) {
+      setError(err.message || "Failed to remove item.");
+    } finally {
+      setUpdatingItemId(null);
+    }
+  };
+
+  const subtotal = useMemo(
+    () => cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
+    [cartItems]
   );
 
-  const total = subtotal + deliveryFee;
+  const total = subtotal + (cartItems.length ? deliveryFee : 0);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 flex flex-col">
@@ -64,7 +87,17 @@ const Cart = () => {
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 flex-1">
         <h2 className="text-2xl sm:text-3xl font-semibold mb-8">Your Cart</h2>
 
-        {cartItems.length === 0 ? (
+        {error ? (
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <div className="bg-white rounded-2xl shadow-sm p-8 sm:p-16 text-center text-sm text-gray-500">
+            Loading cart...
+          </div>
+        ) : cartItems.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-sm p-8 sm:p-16 text-center">
             <img
               src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
@@ -108,23 +141,26 @@ const Cart = () => {
                     <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-auto">
                       <div className="flex items-center border rounded-xl overflow-hidden">
                         <button
-                          onClick={() => decreaseQty(item.id)}
-                          className="px-4 py-2 hover:bg-gray-100"
+                          onClick={() => decreaseQty(item)}
+                          className="px-4 py-2 hover:bg-gray-100 disabled:opacity-60"
+                          disabled={updatingItemId === item.id || item.quantity <= 0}
                         >
                           -
                         </button>
                         <span className="px-4">{item.quantity}</span>
                         <button
-                          onClick={() => increaseQty(item.id)}
-                          className="px-4 py-2 hover:bg-gray-100"
+                          onClick={() => increaseQty(item)}
+                          className="px-4 py-2 hover:bg-gray-100 disabled:opacity-60"
+                          disabled={updatingItemId === item.id}
                         >
                           +
                         </button>
                       </div>
 
                       <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-gray-400 hover:text-red-500 transition"
+                        onClick={() => removeItem(item)}
+                        className="text-gray-400 hover:text-red-500 transition disabled:opacity-60"
+                        disabled={updatingItemId === item.id}
                       >
                         <Trash2 size={20} />
                       </button>
@@ -145,7 +181,7 @@ const Cart = () => {
 
                 <div className="flex justify-between">
                   <span>Delivery Fee</span>
-                  <span>N{deliveryFee.toLocaleString()}</span>
+                  <span>N{(cartItems.length ? deliveryFee : 0).toLocaleString()}</span>
                 </div>
 
                 <hr />
