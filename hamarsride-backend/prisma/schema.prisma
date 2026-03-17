@@ -31,6 +31,7 @@ model User {
   orders        Order[]
   cartItems     CartItem[]
   notifications Notification[]
+  payments     Payment[]
 }
 
 model Address {
@@ -93,6 +94,7 @@ model Order {
 
   user  User        @relation(fields: [userId], references: [id])
   items OrderItem[]
+  payments Payment[]
 }
 
 model OrderItem {
@@ -132,6 +134,28 @@ model CartItem {
 }
 
 
+
+
+
+
+enum PaymentStatus {
+  submitted
+  verified
+  rejected
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  userId     String
+  orderId    String
+  amount     Int
+  receiptUrl String
+  status     PaymentStatus @default(submitted)
+  createdAt  DateTime      @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
+}
 
 
 

@@ -20,9 +20,30 @@ export default function Footer() {
 
         <div>
           <h3 className="text-lg font-semibold mb-3">Social Media</h3>
-          <p className="text-sm text-orange-100">Instagram</p>
-          <p className="text-sm text-orange-100 mt-1">Facebook</p>
-          <p className="text-sm text-orange-100 mt-1">X (Twitter)</p>
+          <a
+            href="https://www.instagram.com/hamarsdelivery_ng?igsh=MTJrdDY4aWgycWMweA=="
+            className="text-sm text-orange-100 hover:text-white transition"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Instagram
+          </a>
+          <a
+            href="https://www.facebook.com/share/1DZ57YqECU/"
+            className="mt-1 block text-sm text-orange-100 hover:text-white transition"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Facebook
+          </a>
+          <a
+            href="https://www.tiktok.com/@hamarsride?_r=1&_t=ZS-94iJKfjouMp"
+            className="mt-1 block text-sm text-orange-100 hover:text-white transition"
+            target="_blank"
+            rel="noreferrer"
+          >
+            TikTok
+          </a>
         </div>
 
         <div>

@@ -1,11 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Copy, CheckCircle2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import NavbarMain from "../components/NavbarMain";
 import Footer from "../components/Footer";
-
-const ADMIN_ORDERS_KEY = "hamarsrideAdminOrders";
-const ADMIN_NOTIFICATIONS_KEY = "hamarsrideAdminNotifications";
+import { API_BASE_URL, apiFetch, getIdToken } from "../src/services/apiClient";
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -13,19 +11,41 @@ export default function Payment() {
   const [copied, setCopied] = useState("");
   const [receiptFile, setReceiptFile] = useState(null);
   const [error, setError] = useState("");
-  const orderInstruction =
-    location.state?.orderInstruction || localStorage.getItem("pendingOrderInstruction") || "";
-  const subtotal = location.state?.subtotal ?? 8000;
-  const deliveryFee = location.state?.deliveryFee ?? 1000;
-  const total = location.state?.total ?? subtotal + deliveryFee;
-  const address = location.state?.address || "Not specified";
-  const orderId = location.state?.orderId || "pending";
-
-  const paymentDetails = {
+  const [success, setSuccess] = useState("");
+  const [paymentDetails, setPaymentDetails] = useState({
     bankName: "GTBank",
     accountName: "HAMARS RIDE LOGISTICS",
     accountNumber: "0123456789",
-  };
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const orderInstruction =
+    location.state?.orderInstruction || localStorage.getItem("pendingOrderInstruction") || "";
+  const subtotal = location.state?.subtotal ?? 0;
+  const deliveryFee = location.state?.deliveryFee ?? 0;
+  const total = location.state?.total ?? subtotal + deliveryFee;
+  const address = location.state?.address || "Not specified";
+  const orderId = location.state?.orderId || "";
+
+  useEffect(() => {
+    const loadInstructions = async () => {
+      try {
+        setIsLoading(true);
+        const payload = await apiFetch("/payments/instructions");
+        setPaymentDetails({
+          bankName: payload.bankName,
+          accountName: payload.accountName,
+          accountNumber: payload.accountNumber,
+        });
+      } catch (err) {
+        setError(err.message || "Failed to load payment instructions.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInstructions();
+  }, []);
 
   const copyText = async (value, key) => {
     try {
@@ -37,58 +57,47 @@ export default function Payment() {
     }
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
+    setError("");
+    setSuccess("");
+
+    if (!orderId) {
+      setError("Missing order ID. Please return to checkout.");
+      return;
+    }
+
     if (!receiptFile) {
       setError("Please upload your payment receipt before continuing.");
       return;
     }
 
-    const orderId = `HMR${Date.now().toString().slice(-6)}`;
-    const now = new Date().toISOString();
-    const newOrder = {
-      id: orderId,
-      customerName: "Aisha",
-      amount: total,
-      subtotal,
-      deliveryFee,
-      address,
-      instruction: orderInstruction || "",
-      receiptName: receiptFile.name,
-      status: "payment_submitted",
-      createdAt: now,
-    };
-
-    let existingOrders = [];
-    let existingNotifications = [];
     try {
-      existingOrders = JSON.parse(localStorage.getItem(ADMIN_ORDERS_KEY) || "[]");
-    } catch (_error) {
-      existingOrders = [];
+      const token = await getIdToken(false);
+      const formData = new FormData();
+      formData.append("orderId", orderId);
+      formData.append("receipt", receiptFile);
+
+      const response = await fetch(`${API_BASE_URL}/payments`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || "Failed to submit payment.");
+      }
+
+      setSuccess("Payment submitted successfully. We will verify shortly.");
+      localStorage.removeItem("pendingOrderInstruction");
+      setTimeout(() => {
+        navigate("/order-history");
+      }, 800);
+    } catch (err) {
+      setError(err.message || "Failed to submit payment.");
     }
-    try {
-      existingNotifications = JSON.parse(localStorage.getItem(ADMIN_NOTIFICATIONS_KEY) || "[]");
-    } catch (_error) {
-      existingNotifications = [];
-    }
-
-    const newNotification = {
-      id: `${Date.now()}`,
-      title: "New Payment Submitted",
-      message: `Order ${orderId} payment submitted by Aisha.`,
-      read: false,
-      createdAt: now,
-      orderId,
-    };
-
-    localStorage.setItem(ADMIN_ORDERS_KEY, JSON.stringify([newOrder, ...existingOrders]));
-    localStorage.setItem(
-      ADMIN_NOTIFICATIONS_KEY,
-      JSON.stringify([newNotification, ...existingNotifications])
-    );
-
-    setError("");
-    localStorage.removeItem("pendingOrderInstruction");
-    navigate("/order-history");
   };
 
   return (
@@ -102,29 +111,47 @@ export default function Payment() {
             Transfer your payment to the admin account below, then confirm your payment.
           </p>
 
+          {error ? (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          ) : null}
+
+          {success ? (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              {success}
+            </div>
+          ) : null}
+
           <div className="mt-6 space-y-4">
-            <PaymentRow
-              label="Bank Name"
-              value={paymentDetails.bankName}
-              onCopy={() => copyText(paymentDetails.bankName, "bank")}
-              copied={copied === "bank"}
-            />
-            <PaymentRow
-              label="Account Name"
-              value={paymentDetails.accountName}
-              onCopy={() => copyText(paymentDetails.accountName, "name")}
-              copied={copied === "name"}
-            />
-            <PaymentRow
-              label="Account Number"
-              value={paymentDetails.accountNumber}
-              onCopy={() => copyText(paymentDetails.accountNumber, "number")}
-              copied={copied === "number"}
-            />
+            {isLoading ? (
+              <div className="text-sm text-gray-500">Loading payment instructions...</div>
+            ) : (
+              <>
+                <PaymentRow
+                  label="Bank Name"
+                  value={paymentDetails.bankName}
+                  onCopy={() => copyText(paymentDetails.bankName, "bank")}
+                  copied={copied === "bank"}
+                />
+                <PaymentRow
+                  label="Account Name"
+                  value={paymentDetails.accountName}
+                  onCopy={() => copyText(paymentDetails.accountName, "name")}
+                  copied={copied === "name"}
+                />
+                <PaymentRow
+                  label="Account Number"
+                  value={paymentDetails.accountNumber}
+                  onCopy={() => copyText(paymentDetails.accountNumber, "number")}
+                  copied={copied === "number"}
+                />
+              </>
+            )}
           </div>
 
           <div className="mt-6 bg-orange-50 border border-orange-200 rounded-xl p-4 text-sm text-orange-800">
-            Use your Order ID ({orderId}) as transfer narration for faster confirmation.
+            Use your Order ID ({orderId || "N/A"}) as transfer narration for faster confirmation.
           </div>
 
           <div className="mt-6 border border-gray-200 rounded-xl p-4">
@@ -158,9 +185,6 @@ export default function Payment() {
               <p className="text-xs text-green-700 mt-2">
                 Selected: {receiptFile.name}
               </p>
-            ) : null}
-            {error ? (
-              <p className="text-xs text-red-600 mt-2">{error}</p>
             ) : null}
           </div>
 
