@@ -19,6 +19,15 @@ const updateQtySchema = z.object({
 
 router.use(requireAuth);
 
+const mapCartItem = (item) => ({
+  id: item.id,
+  menuItemId: item.menuItemId,
+  name: item.name,
+  price: item.price,
+  quantity: item.qty,
+  image: item.image,
+});
+
 router.get("/", async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
@@ -34,15 +43,7 @@ router.get("/", async (req, res, next) => {
       orderBy: { createdAt: "desc" },
     });
 
-    const mapped = items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.qty,
-      image: item.image,
-    }));
-
-    return res.status(200).json({ items: mapped });
+    return res.status(200).json({ items: items.map(mapCartItem) });
   } catch (error) {
     return next(error);
   }
@@ -101,15 +102,7 @@ router.post("/items", async (req, res, next) => {
         data: { qty: existing.qty + quantity },
       });
 
-      return res.status(200).json({
-        item: {
-          id: updated.id,
-          name: updated.name,
-          price: updated.price,
-          quantity: updated.qty,
-          image: updated.image,
-        },
-      });
+      return res.status(200).json({ item: mapCartItem(updated) });
     }
 
     const created = await prisma.cartItem.create({
@@ -123,15 +116,7 @@ router.post("/items", async (req, res, next) => {
       },
     });
 
-    return res.status(201).json({
-      item: {
-        id: created.id,
-        name: created.name,
-        price: created.price,
-        quantity: created.qty,
-        image: created.image,
-      },
-    });
+    return res.status(201).json({ item: mapCartItem(created) });
   } catch (error) {
     return next(error);
   }
@@ -166,15 +151,7 @@ router.patch("/items/:id", async (req, res, next) => {
       data: { qty: quantity },
     });
 
-    return res.status(200).json({
-      item: {
-        id: updated.id,
-        name: updated.name,
-        price: updated.price,
-        quantity: updated.qty,
-        image: updated.image,
-      },
-    });
+    return res.status(200).json({ item: mapCartItem(updated) });
   } catch (error) {
     return next(error);
   }

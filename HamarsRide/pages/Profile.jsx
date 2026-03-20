@@ -179,7 +179,10 @@ export default function Profile() {
 
           <div className="bg-white rounded-2xl shadow-md p-6 sm:p-8 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-              <button className="text-gray-700 hover:text-orange-600 transition">
+              <button
+                onClick={() => navigate("/change-password")}
+                className="text-gray-700 hover:text-orange-600 transition"
+              >
                 Change Password
               </button>
               <button

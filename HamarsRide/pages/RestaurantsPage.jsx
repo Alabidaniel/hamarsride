@@ -1,29 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { Star, ChevronDown } from "lucide-react";
+import { Star, ChevronDown, Search } from "lucide-react";
 import Footer from "../components/Footer";
 import NavbarMain from "../components/NavbarMain";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../src/services/apiClient";
 
-// Shared restaurants data
-export const restaurants = [];
-
 export default function RestaurantsPage() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const [openOnly, setOpenOnly] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const payload = await apiFetch("/restaurants");
+        setIsLoading(true);
+        setError("");
+        const params = new URLSearchParams();
+        if (query.trim()) params.set("q", query.trim());
+        if (openOnly) params.set("open", "true");
+        const path = params.toString() ? `/restaurants?${params.toString()}` : "/restaurants";
+        const payload = await apiFetch(path);
         setList(payload.restaurants || []);
       } catch (err) {
         setError(err.message || "Failed to load restaurants.");
+      } finally {
+        setIsLoading(false);
       }
     };
-    load();
-  }, []);
+
+    const handler = setTimeout(load, 300);
+    return () => clearTimeout(handler);
+  }, [query, openOnly]);
 
   return (
     <div className="min-h-screen bg-gray-50 font-[Inter] text-gray-800 flex flex-col">
@@ -40,6 +50,17 @@ export default function RestaurantsPage() {
           <p className="text-gray-500 mt-1 text-sm sm:text-base">
             Discover your favorite meals
           </p>
+        </div>
+
+        {/* SEARCH */}
+        <div className="mt-6 flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
+          <Search size={18} className="text-gray-500" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search restaurants..."
+            className="w-full outline-none text-sm"
+          />
         </div>
 
         {/* FILTER BAR */}
@@ -59,7 +80,12 @@ export default function RestaurantsPage() {
 
           {/* Checkbox */}
           <label className="flex items-center gap-2 cursor-pointer text-sm">
-            <input type="checkbox" className="accent-orange-600" />
+            <input
+              type="checkbox"
+              className="accent-orange-600"
+              checked={openOnly}
+              onChange={(event) => setOpenOnly(event.target.checked)}
+            />
             Open now
           </label>
         </div>
@@ -69,7 +95,9 @@ export default function RestaurantsPage() {
           {error ? (
             <div className="col-span-full text-sm text-red-600">{error}</div>
           ) : null}
-          {list.length === 0 ? (
+          {isLoading ? (
+            <div className="col-span-full text-sm text-gray-500">Loading restaurants...</div>
+          ) : list.length === 0 ? (
             <div className="col-span-full text-sm text-gray-500">No restaurants available.</div>
           ) : null}
           {list.map((restaurant) => (

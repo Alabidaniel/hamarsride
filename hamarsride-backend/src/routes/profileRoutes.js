@@ -19,6 +19,11 @@ const updateSchema = z.object({
   photoUrl: z.string().min(1).optional(),
 });
 
+const passwordSchema = z.object({
+  newPassword: z.string().min(6),
+  currentPassword: z.string().min(1),
+});
+
 const uploadRoot = path.join(__dirname, "..", "..", "uploads", "profile-photos");
 fs.mkdirSync(uploadRoot, { recursive: true });
 
@@ -86,6 +91,26 @@ router.patch("/", async (req, res, next) => {
     });
 
     return res.status(200).json({ user: updated });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post("/password", async (req, res, next) => {
+  try {
+    const data = passwordSchema.parse(req.body);
+    const user = await prisma.user.findUnique({
+      where: { firebaseUid: req.user.uid },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const auth = getAuth();
+    await auth.updateUser(req.user.uid, { password: data.newPassword });
+
+    return res.status(200).json({ message: "Password updated successfully." });
   } catch (error) {
     return next(error);
   }

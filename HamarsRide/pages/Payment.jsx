@@ -185,13 +185,22 @@ export default function Payment() {
               <p className="text-xs text-green-700 mt-2">
                 Selected: {receiptFile.name}
               </p>
-            ) : null}
+            ) : (
+              <p className="text-xs text-gray-500 mt-2">
+                Upload a receipt to enable payment confirmation.
+              </p>
+            )}
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleConfirmPayment}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold transition"
+              disabled={!receiptFile}
+              className={`px-6 py-3 rounded-xl font-semibold transition ${
+                receiptFile
+                  ? "bg-orange-600 hover:bg-orange-700 text-white"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
+              }`}
             >
               I Have Made Payment
             </button>

@@ -391,6 +391,7 @@ const EditProfile = () => {
 
               <button
                 type="button"
+                onClick={() => navigate("/change-password")}
                 className="border border-gray-700 text-gray-700 px-6 py-2 rounded-xl hover:bg-gray-100 transition"
               >
                 Change Password
