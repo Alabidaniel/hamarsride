@@ -34,7 +34,7 @@ export default function OrderHistory() {
               <p className="text-gray-500 mt-1">View your previous delivery requests.</p>
             </div>
             <button
-              onClick={() => navigate("/new-delivery")}
+              onClick={() => navigate("/restaurants")}
               className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition"
             >
               New Delivery

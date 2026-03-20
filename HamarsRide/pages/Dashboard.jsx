@@ -1,4 +1,4 @@
-import { Bell, Search, Phone, Package, FileText, Clock, MapPin } from "lucide-react";
+import { Bell, Search, Phone, Package, FileText, Clock, MapPin, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +7,7 @@ import Footer from "../components/Footer";
 import NavbarMain from "../components/NavbarMain";
 import { apiFetch } from "../src/services/apiClient";
 import { auth } from "../src/firebase";
+import { API_BASE_URL } from "../src/config";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -15,6 +16,9 @@ export default function Dashboard() {
   const [activeError, setActiveError] = useState("");
   const [recentOrders, setRecentOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [featuredRestaurants, setFeaturedRestaurants] = useState([]);
+  const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+  const [featuredError, setFeaturedError] = useState("");
   const categories = [
     "Amala",
     "Pizza",
@@ -24,7 +28,7 @@ export default function Dashboard() {
   ];
 
   const actions = [
-    { icon: Package, label: "New Delivery", subtitle: "Start a fresh order", path: "/new-delivery" },
+    { icon: Package, label: "New Delivery", subtitle: "Start a fresh order", path: "/restaurants" },
     { icon: FileText, label: "Order History", subtitle: "View past requests", path: "/order-history" },
     { icon: Clock, label: "Saved Addresses", subtitle: "Manage locations", path: "/saved-addresses" },
     { icon: MapPin, label: "Delivered", subtitle: "Track completed orders", path: "/delivered-orders" },
@@ -32,6 +36,36 @@ export default function Dashboard() {
 
   useEffect(() => {
     let isMounted = true;
+
+    const buildPublicUrl = (path) => {
+      if (path.startsWith("http")) return path;
+      return `${API_BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    };
+
+    const loadFeatured = async () => {
+      try {
+        setIsLoadingFeatured(true);
+        setFeaturedError("");
+        const response = await fetch(buildPublicUrl("/restaurants"));
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload.error || payload.message || "Failed to load restaurants.");
+        }
+        const payload = await response.json();
+        if (isMounted) {
+          setFeaturedRestaurants(payload.restaurants || []);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setFeaturedError(err.message || "Failed to load restaurants.");
+          setFeaturedRestaurants([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingFeatured(false);
+        }
+      }
+    };
 
     const loadActiveOrder = async () => {
       try {
@@ -83,6 +117,8 @@ export default function Dashboard() {
       loadActiveOrder();
       loadRecentOrders();
     });
+
+    loadFeatured();
 
     return () => {
       isMounted = false;
@@ -141,14 +177,10 @@ export default function Dashboard() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* NAVBAR */}
         <NavbarMain />
 
-        {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT SIDE */}
           <div className="lg:col-span-2 space-y-6">
-            {/* HERO */}
             <div className="bg-white rounded-2xl p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6">
               <div className="flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold leading-snug">
@@ -158,7 +190,7 @@ export default function Dashboard() {
                 </h1>
 
                 <button
-                  onClick={() => navigate("/new-delivery")}
+                  onClick={() => navigate("/restaurants")}
                   className="mt-4 sm:mt-6 bg-orange-500 text-white px-6 py-3 rounded-full font-semibold shadow"
                 >
                   Create New Delivery
@@ -180,7 +212,6 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* CATEGORIES */}
             <div className="flex gap-3 flex-wrap">
               {categories.map((item) => (
                 <button
@@ -192,18 +223,52 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* FEATURED */}
             <div className="bg-white rounded-2xl p-4 sm:p-6">
               <h2 className="font-semibold mb-4 text-lg">Featured Restaurants</h2>
 
               <div className="flex gap-4 overflow-x-auto pb-2">
-                <FoodCard title="Chicken Republic Chicken" fee="₦500 fee" img="/food.jpg" />
-                <FoodCard title="Burger Rice Pot" fee="₦200 fee" img="/food.jpg" />
-                <FoodCard title="Mama Rice Special" fee="Free" img="/food.jpg" />
+                {isLoadingFeatured ? (
+                  <div className="text-sm text-gray-500">Loading restaurants...</div>
+                ) : featuredError ? (
+                  <div className="text-sm text-red-600">{featuredError}</div>
+                ) : featuredRestaurants.length === 0 ? (
+                  <div className="text-sm text-gray-500">No restaurants available.</div>
+                ) : (
+                  featuredRestaurants.slice(0, 6).map((restaurant) => (
+                    <div
+                      key={restaurant.id}
+                      onClick={() => navigate(`/restaurants/${restaurant.id}`)}
+                      className="w-56 sm:w-60 flex-shrink-0 bg-gray-50 rounded-xl p-3 shadow-sm cursor-pointer hover:shadow-md transition"
+                    >
+                      <img
+                        src={restaurant.image}
+                        alt={restaurant.name}
+                        className="rounded-lg mb-2 w-full h-36 object-cover"
+                      />
+
+                      <h3 className="font-semibold text-sm">{restaurant.name}</h3>
+
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <Star size={12} className="text-amber-500" />
+                        {restaurant.rating} - {restaurant.time}
+                      </p>
+
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs text-gray-500">{restaurant.fee}</span>
+                        <span
+                          className={`text-xs ${
+                            restaurant.open ? "text-green-600" : "text-gray-400"
+                          }`}
+                        >
+                          {restaurant.open ? "Open" : "Closed"}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
-            {/* RECENT ORDERS */}
             <div className="bg-white rounded-2xl p-4 sm:p-6 overflow-x-auto">
               <h2 className="font-semibold mb-4 text-lg">Recent Orders</h2>
               {isLoadingOrders ? (
@@ -225,8 +290,8 @@ export default function Dashboard() {
                     {recentOrders.map((order) => (
                       <tr key={order.id} className="text-center">
                         <td>{order.id}</td>
-                        <td>{order.pickup || "�"}</td>
-                        <td>{order.dropoff || "�"}</td>
+                        <td>{order.pickup || "-"}</td>
+                        <td>{order.dropoff || "-"}</td>
                         <td>
                           <span className={`px-3 py-1 rounded-full ${statusBadge(order.status)}`}>
                             {order.status}
@@ -240,9 +305,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RIGHT SIDEBAR */}
           <div className="space-y-6">
-            {/* TRACKER */}
             <div className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 shadow-sm">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-gray-900">Active Order Tracking</h3>
@@ -312,7 +375,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* QUICK ACTIONS */}
             <div className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
 
@@ -334,30 +396,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* FOOTER */}
       <Footer />
-    </div>
-  );
-}
-
-function FoodCard({ title, fee, img }) {
-  const navigate = useNavigate();
-
-  return (
-    <div
-      onClick={() => navigate("/restaurants")}
-      className="w-56 sm:w-60 flex-shrink-0 bg-gray-50 rounded-xl p-3 shadow-sm cursor-pointer hover:shadow-md transition"
-    >
-      <img src={img} alt="" className="rounded-lg mb-2 w-full h-36 object-cover" />
-
-      <h3 className="font-semibold text-sm">{title}</h3>
-
-      <p className="text-xs text-gray-500">⭐ 4.5 • 25 min</p>
-
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-xs text-gray-500">{fee}</span>
-        <span className="text-green-600 text-xs">Open</span>
-      </div>
     </div>
   );
 }

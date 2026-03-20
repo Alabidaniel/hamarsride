@@ -14,12 +14,12 @@ import Cart from '../pages/Cart';
 import EditProfile from '../pages/EditProfile';
 import Notifications from '../pages/Notifications';
 import AddNewAddress from '../pages/AddNewAddress';
-import NewDelivery from '../pages/NewDelivery';
 import OrderHistory from '../pages/OrderHistory';
 import SavedAddresses from '../pages/SavedAddresses';
 import DeliveredOrders from '../pages/DeliveredOrders';
 import Payment from '../pages/Payment';
 import AdminDashboard from '../pages/AdminDashboard';
+import ChangePassword from '../pages/ChangePassword';
 
 export default function App() {
   return (
@@ -36,9 +36,9 @@ export default function App() {
       <Route path='/cart' element={<Cart />} />
       <Route path='/Checkout' element={<Checkout />} />
       <Route path='/EditProfile' element={<EditProfile />} />
+      <Route path='/change-password' element={<ChangePassword />} />
       <Route path='/notifications' element={<Notifications />} />
       <Route path='/add-address' element={<AddNewAddress />} />
-      <Route path='/new-delivery' element={<NewDelivery />} />
       <Route path='/order-history' element={<OrderHistory />} />
       <Route path='/saved-addresses' element={<SavedAddresses />} />
       <Route path='/delivered-orders' element={<DeliveredOrders />} />
