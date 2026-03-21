@@ -45,7 +45,7 @@ const statusNotifications = {
 };
 
 router.use(requireAuth);
-router.use(requireRole(["admin", "rider"]));
+router.use(requireRole(["admin"]));
 
 router.get("/", async (req, res, next) => {
   try {

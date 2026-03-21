@@ -1,17 +1,14 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+
 const authRoutes = require("./routes/authRoutes");
-const profileRoutes = require("./routes/profileRoutes");
-const addressesRoutes = require("./routes/addressesRoutes");
-const restaurantsRoutes = require("./routes/restaurantsRoutes");
-const ordersRoutes = require("./routes/ordersRoutes");
-const adminOrdersRoutes = require("./routes/adminOrdersRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const notificationsRoutes = require("./routes/notificationsRoutes");
-const cartRoutes = require("./routes/cartRoutes");
-const paymentsRoutes = require("./routes/paymentsRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const { initFirebase } = require("./config/firebase");
 
@@ -25,6 +22,11 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const uploadsDir =
+  process.env.ADMIN_UPLOADS_DIR ||
+  path.resolve(__dirname, "..", "..", "hamarsride-backend", "uploads");
+
+app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -37,22 +39,24 @@ app.use(
   })
 );
 app.use(express.json({ limit: "1mb" }));
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use(morgan("dev"));
+app.use("/uploads", express.static(uploadsDir));
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
+  return res.status(200).json({ status: "ok", service: "hamarsride-admin-backend" });
 });
 
 app.use("/auth", authRoutes);
-app.use("/me", profileRoutes);
-app.use("/addresses", addressesRoutes);
-app.use("/restaurants", restaurantsRoutes);
-app.use("/orders", ordersRoutes);
-app.use("/admin/orders", adminOrdersRoutes);
 app.use("/admin", adminRoutes);
 app.use("/notifications", notificationsRoutes);
-app.use("/cart", cartRoutes);
-app.use("/payments", paymentsRoutes);
 
 app.use(errorHandler);
 

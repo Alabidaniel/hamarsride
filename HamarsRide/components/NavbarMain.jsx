@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Bell, Search, ShoppingCart, House } from "lucide-react";
+import { Bell, Search, ShoppingCart, House, Store } from "lucide-react";
 import Logo from '../src/assets/logo.png'
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL, apiFetch } from "../src/services/apiClient";
@@ -88,6 +88,14 @@ export default function NavbarMain() {
           aria-label="Go to dashboard"
         >
           <House className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+
+        <button
+          onClick={() => navigate("/restaurants")}
+          className="text-gray-600 hover:text-orange-600 transition"
+          aria-label="Browse restaurants"
+        >
+          <Store className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
         <button
