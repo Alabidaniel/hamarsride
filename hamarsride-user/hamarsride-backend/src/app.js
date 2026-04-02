@@ -34,6 +34,9 @@ const envOrigins = (process.env.CORS_ORIGINS || "")
 const allowedOrigins = envOrigins.length > 0 ? envOrigins : defaultOrigins;
 const isAllowedLocalOrigin = (origin) =>
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+const uploadsDir =
+  process.env.USER_UPLOADS_DIR ||
+  path.join(__dirname, "..", "uploads");
 
 app.use(
   cors({
@@ -48,7 +51,7 @@ app.use(
   })
 );
 app.use(express.json({ limit: "1mb" }));
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use("/uploads", express.static(uploadsDir));
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });

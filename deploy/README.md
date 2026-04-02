@@ -21,6 +21,24 @@ npm run build:user
 npm run build:admin
 ```
 
+## Docker Compose
+
+This repo also includes a one-command deployment option:
+
+```powershell
+docker compose --env-file .env.compose up -d --build
+```
+
+Copy [.env.compose.example](/c:/Users/user/OneDrive/Desktop/Desktop/HAMMARSRIDE/.env.compose.example) to `.env.compose` first and set the real credentials and public URLs for your server.
+
+The compose stack brings up:
+
+- MySQL
+- user backend
+- admin backend
+- user frontend
+- admin frontend
+
 ## Run backends
 
 Use PM2 or another process manager for the two backends.
