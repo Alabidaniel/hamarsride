@@ -12,3 +12,14 @@ dist/
 .DS_Store
 Thumbs.db
 _secrets_backup/
+
+# Runtime uploads
+hamarsride-user/hamarsride-backend/uploads/*
+!hamarsride-user/hamarsride-backend/uploads/.gitkeep
+!hamarsride-user/hamarsride-backend/uploads/menu/
+!hamarsride-user/hamarsride-backend/uploads/payment-receipts/
+!hamarsride-user/hamarsride-backend/uploads/profile-photos/
+hamarsride-user/hamarsride-backend/uploads/menu/*
+hamarsride-user/hamarsride-backend/uploads/payment-receipts/*
+hamarsride-user/hamarsride-backend/uploads/profile-photos/*
+!hamarsride-user/hamarsride-backend/uploads/profile-photos/.gitkeep

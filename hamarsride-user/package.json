@@ -1,0 +1,10 @@
+{
+  "name": "hamarsride-user",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./start-dev.ps1",
+    "build": "npm --prefix HamarsRide run build",
+    "test": "npm --prefix HamarsRide run test && npm --prefix hamarsride-backend run test"
+  }
+}

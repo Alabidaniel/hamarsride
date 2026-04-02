@@ -1,10 +1,11 @@
 ﻿import { useEffect, useState } from "react";
-import { ClipboardList, CreditCard, Store, Users, Truck, Clock3 } from "lucide-react";
+import { ClipboardList, CreditCard, Store, Users, Truck, Clock3, CheckCircle2 } from "lucide-react";
 import { apiFetch } from "../src/services/apiClient";
 
 const cards = [
   { key: "totalOrders", label: "Total Orders", icon: ClipboardList },
   { key: "pendingOrders", label: "Pending Orders", icon: Clock3 },
+  { key: "rejectedOrders", label: "Rejected Orders", icon: CheckCircle2 },
   { key: "deliveredOrders", label: "Delivered Orders", icon: Truck },
   { key: "pendingPayments", label: "Pending Payments", icon: CreditCard },
   { key: "totalUsers", label: "Users", icon: Users },

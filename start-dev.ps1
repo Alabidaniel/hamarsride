@@ -1,37 +1,29 @@
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$backendDir = Join-Path $root 'hamarsride-backend'
-$frontendDir = Join-Path $root 'HamarsRide'
+$userScript = Join-Path $root 'hamarsride-user\start-dev.ps1'
+$adminScript = Join-Path $root 'hamarsride-admin\start-dev.ps1'
 
-if (-not (Test-Path $backendDir)) {
-  $alternateBackendDir = Join-Path $root 'Hamarsride-Backend'
-  if (Test-Path $alternateBackendDir) {
-    $backendDir = $alternateBackendDir
-  } else {
-    throw "Backend directory not found: $backendDir"
-  }
+if (-not (Test-Path $userScript)) {
+  throw "User dev script not found: $userScript"
 }
 
-if (-not (Test-Path $frontendDir)) {
-  throw "Frontend directory not found: $frontendDir"
+if (-not (Test-Path $adminScript)) {
+  throw "Admin dev script not found: $adminScript"
 }
-
-$backendCommand = "Set-Location '$backendDir'; npm.cmd run dev"
-$frontendCommand = "Set-Location '$frontendDir'; npm.cmd run dev"
 
 Start-Process -FilePath 'powershell.exe' -ArgumentList @(
   '-NoExit',
   '-NoProfile',
   '-ExecutionPolicy', 'Bypass',
-  '-Command', $backendCommand
+  '-File', $userScript
 ) | Out-Null
 
 Start-Process -FilePath 'powershell.exe' -ArgumentList @(
   '-NoExit',
   '-NoProfile',
   '-ExecutionPolicy', 'Bypass',
-  '-Command', $frontendCommand
+  '-File', $adminScript
 ) | Out-Null
 
-Write-Host 'Started backend and frontend in separate terminals.'
+Write-Host 'Started user and admin app stacks in separate terminals.'

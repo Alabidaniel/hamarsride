@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bell,
   LayoutDashboard,
@@ -9,7 +9,7 @@ import {
   CreditCard,
   ListChecks,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../src/services/apiClient";
 import { useAdminAuth } from "../src/context/AdminAuthContext";
 
@@ -22,14 +22,41 @@ const links = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
+const formatRelativeTime = (dateString) => {
+  if (!dateString) return "";
+  const created = new Date(dateString);
+  if (Number.isNaN(created.getTime())) return "";
+
+  const diffMs = Date.now() - created.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins} min${diffMins === 1 ? "" : "s"} ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+};
+
+const getNotificationTarget = (item) => {
+  const haystack = `${item.type || ""} ${item.title || ""} ${item.message || ""}`.toLowerCase();
+  if (haystack.includes("payment") || haystack.includes("receipt")) return "/payments";
+  if (haystack.includes("order")) return "/orders";
+  if (haystack.includes("user") || haystack.includes("account")) return "/users";
+  if (haystack.includes("restaurant") || haystack.includes("shop")) return "/restaurants";
+  return "";
+};
+
 export default function AdminNavbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { profile, logout } = useAdminAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [openNotice, setOpenNotice] = useState(false);
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       const payload = await apiFetch("/notifications");
       setNotifications(payload.notifications || []);
@@ -38,13 +65,18 @@ export default function AdminNavbar() {
       setNotifications([]);
       setUnreadCount(0);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadNotifications();
+    const bootTimer = setTimeout(() => {
+      loadNotifications();
+    }, 0);
     const timer = setInterval(loadNotifications, 30000);
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      clearTimeout(bootTimer);
+      clearInterval(timer);
+    };
+  }, [loadNotifications]);
 
   const initials = useMemo(() => {
     if (!profile?.name) return "A";
@@ -64,6 +96,20 @@ export default function AdminNavbar() {
   const markOneRead = async (id) => {
     await apiFetch(`/notifications/${id}/read`, { method: "PATCH" });
     loadNotifications();
+  };
+
+  const openNotification = async (item) => {
+    if (!item.isRead) {
+      await markOneRead(item.id);
+    } else {
+      loadNotifications();
+    }
+
+    const target = getNotificationTarget(item);
+    if (target) {
+      setOpenNotice(false);
+      navigate(target);
+    }
   };
 
   return (
@@ -104,22 +150,39 @@ export default function AdminNavbar() {
                 </div>
 
                 {notifications.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-5">No notifications yet.</p>
+                  <p className="text-sm text-gray-500 text-center py-5">
+                    No notifications yet. Admin alerts will show up here.
+                  </p>
                 ) : (
                   <div className="space-y-2">
                     {notifications.slice(0, 12).map((item) => (
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() => markOneRead(item.id)}
+                        onClick={() => openNotification(item)}
                         className={`w-full text-left p-2.5 rounded-xl border transition ${
                           item.isRead
                             ? "bg-gray-50 border-gray-200"
                             : "bg-orange-50 border-orange-200"
                         }`}
                       >
-                        <p className="text-xs font-semibold text-gray-900">{item.title}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-xs font-semibold text-gray-900">{item.title}</p>
+                          {!item.isRead ? (
+                            <span className="text-[10px] rounded-full bg-orange-100 text-orange-700 px-2 py-0.5">
+                              New
+                            </span>
+                          ) : null}
+                        </div>
                         <p className="text-xs text-gray-600 mt-1">{item.message}</p>
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-gray-500">
+                            {formatRelativeTime(item.createdAt)}
+                          </span>
+                          <span className="text-[11px] font-medium text-orange-600">
+                            View
+                          </span>
+                        </div>
                       </button>
                     ))}
                   </div>

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "model": "gpt-image-1.5",
+  "imageSize": "1024x1024",
+  "quality": "high",
+  "background": "clean-neutral",
+  "lighting": "soft-natural",
+  "cameraAngle": "slight-top-front",
+  "composition": "single-subject-centered",
+  "negativePrompt": "blurry, watermark, logo overlay, text overlay, people, hands, cluttered background, duplicate plates, distorted packaging",
+  "outputNotes": "Use one image per menu item and keep style consistent across all restaurants."
+}

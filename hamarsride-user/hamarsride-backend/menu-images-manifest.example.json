@@ -1,0 +1,8 @@
+{
+  "items": [
+    {
+      "menuItemId": "replace-with-menu-item-id",
+      "image": "https://your-cdn.example.com/menu/image-1.jpg"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const notificationsRoutes = require("./routes/notificationsRoutes");
+const receiptsRoutes = require("./routes/receiptsRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const { initFirebase } = require("./config/firebase");
 
@@ -17,21 +18,22 @@ initFirebase();
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ORIGINS || "")
+const defaultOrigins = ["http://localhost:5174"];
+const allowedOrigins = (process.env.CORS_ORIGINS || defaultOrigins.join(","))
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
 const uploadsDir =
   process.env.ADMIN_UPLOADS_DIR ||
-  path.resolve(__dirname, "..", "..", "hamarsride-backend", "uploads");
+  path.resolve(__dirname, "..", "uploads");
 
 app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error("CORS origin not allowed"));
@@ -57,6 +59,7 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/notifications", notificationsRoutes);
+app.use("/receipts", receiptsRoutes);
 
 app.use(errorHandler);
 

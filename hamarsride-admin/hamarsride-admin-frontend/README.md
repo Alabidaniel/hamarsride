@@ -1,16 +1,40 @@
-# React + Vite
+﻿# HamarsRide Admin Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Admin dashboard web app for operations (orders, users, restaurants, payments, notifications).
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19
+- Vite
+- Tailwind CSS
+- Firebase Auth
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Install dependencies:
 
-## Expanding the ESLint configuration
+```bash
+npm install
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. Configure env values (including API proxy target where needed).
+
+3. Start dev server:
+
+```bash
+npm run dev
+```
+
+## Scripts
+
+- `npm run dev` - start local dev server
+- `npm run build` - production build
+- `npm run lint` - lint checks
+- `npm run test` - smoke tests (`node tests/smoke.test.js`)
+- `npm run preview` - preview production build
+
+## Notes
+
+- API proxy is configured in `vite.config.js` using `VITE_API_PROXY_TARGET`.
+- Feature pages live in `pages/`.
+

@@ -29,6 +29,7 @@ That email must already exist in `User` table.
 
 - `npm run dev`
 - `npm run start`
+- `npm run test`
 - `npm run check`
 - `npm run prisma:generate`
 - `npm run prisma:migrate`

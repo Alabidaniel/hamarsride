@@ -1,0 +1,230 @@
+import React from "react";
+
+export default function ReceiptModal({ receipt, onClose }) {
+  if (!receipt) return null;
+
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const formatCurrency = (amount) => `₦${Number(amount || 0).toLocaleString()}`;
+
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+  const buildReceiptHtml = () => {
+    const rows = (receipt.items || [])
+      .map(
+        (item) => `
+          <tr>
+            <td>${escapeHtml(item.name)}</td>
+            <td style="text-align:center;">${escapeHtml(item.qty)}</td>
+            <td style="text-align:right;">${escapeHtml(formatCurrency(item.price))}</td>
+            <td style="text-align:right;">${escapeHtml(formatCurrency(item.total))}</td>
+          </tr>
+        `
+      )
+      .join("");
+
+    return `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Receipt ${escapeHtml(receipt.receiptNumber)}</title>
+          <style>
+            body { margin: 0; font-family: Arial, sans-serif; background: #f4f1eb; color: #1f2937; }
+            .sheet { max-width: 820px; margin: 32px auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden; }
+            .header { padding: 28px; background: linear-gradient(135deg, #7c5a42, #a07758); color: #fffaf4; }
+            .header h1 { margin: 0; font-size: 28px; }
+            .header p { margin: 8px 0 0; opacity: 0.9; }
+            .body { padding: 28px; }
+            .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+            .card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; }
+            .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; margin-bottom: 6px; }
+            .value { font-size: 14px; font-weight: 600; color: #111827; line-height: 1.5; white-space: pre-wrap; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            th, td { padding: 12px 10px; border-top: 1px solid #e5e7eb; font-size: 14px; }
+            th { text-align: left; background: #f9fafb; color: #6b7280; font-weight: 600; }
+            .summary { margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px; }
+            .summary-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; }
+            .total { font-size: 18px; font-weight: 700; color: #c2410c; border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 12px; }
+            .footer { padding: 20px 28px 28px; color: #9ca3af; font-size: 12px; text-align: center; }
+            @media print { body { background: #fff; } .sheet { margin: 0; border: 0; border-radius: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="sheet">
+            <div class="header">
+              <h1>HamarsRide Receipt</h1>
+              <p>Receipt #${escapeHtml(receipt.receiptNumber)}</p>
+            </div>
+            <div class="body">
+              <div class="grid">
+                <div class="card"><div class="label">Order ID</div><div class="value">${escapeHtml(receipt.orderId)}</div></div>
+                <div class="card"><div class="label">Date</div><div class="value">${escapeHtml(formatDate(receipt.createdAt))}</div></div>
+                <div class="card"><div class="label">Delivery Address</div><div class="value">${escapeHtml(receipt.address)}</div></div>
+                <div class="card"><div class="label">Instructions</div><div class="value">${escapeHtml(receipt.instruction || "None")}</div></div>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th style="text-align:center;">Qty</th>
+                    <th style="text-align:right;">Price</th>
+                    <th style="text-align:right;">Total</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+              <div class="summary">
+                <div class="summary-row"><span>Subtotal</span><span>${escapeHtml(formatCurrency(receipt.subtotal))}</span></div>
+                <div class="summary-row"><span>Delivery Fee</span><span>${escapeHtml(formatCurrency(receipt.deliveryFee))}</span></div>
+                <div class="summary-row total"><span>Total</span><span>${escapeHtml(formatCurrency(receipt.total))}</span></div>
+              </div>
+            </div>
+            <div class="footer">Generated by HamarsRide Admin.</div>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([buildReceiptHtml()], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `receipt-${receipt.receiptNumber || receipt.orderId || "hamarsride"}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const handlePrint = () => {
+    const printWindow = window.open("", "_blank", "noopener,noreferrer,width=900,height=900");
+    if (!printWindow) return;
+
+    printWindow.document.open();
+    printWindow.document.write(buildReceiptHtml());
+    printWindow.document.close();
+    printWindow.focus();
+
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 300);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white">
+        <div className="p-6 sm:p-8">
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Receipt</h2>
+              <p className="mt-1 text-sm text-gray-500">Receipt #{receipt.receiptNumber}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 transition hover:text-gray-600"
+              aria-label="Close receipt"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="mb-6 rounded-xl bg-gray-50 p-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-gray-500">Order ID</p>
+                <p className="font-medium text-gray-900">{receipt.orderId}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Date</p>
+                <p className="font-medium text-gray-900">{formatDate(receipt.createdAt)}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Delivery Address</p>
+                <p className="font-medium text-gray-900 whitespace-pre-wrap">{receipt.address}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Instructions</p>
+                <p className="font-medium text-gray-900 whitespace-pre-wrap">{receipt.instruction || "None"}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="mb-3 text-lg font-semibold text-gray-900">Items</h3>
+            <div className="overflow-hidden rounded-xl border border-gray-200">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium text-gray-500">Item</th>
+                    <th className="px-4 py-3 text-center font-medium text-gray-500">Qty</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">Price</th>
+                    <th className="px-4 py-3 text-right font-medium text-gray-500">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(receipt.items || []).map((item, index) => (
+                    <tr key={index} className="border-t border-gray-100">
+                      <td className="px-4 py-3 text-gray-900">{item.name}</td>
+                      <td className="px-4 py-3 text-center text-gray-600">{item.qty}</td>
+                      <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(item.price)}</td>
+                      <td className="px-4 py-3 text-right font-medium text-gray-900">{formatCurrency(item.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Subtotal</span>
+                <span className="text-gray-900">{formatCurrency(receipt.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Delivery Fee</span>
+                <span className="text-gray-900">{formatCurrency(receipt.deliveryFee)}</span>
+              </div>
+              <div className="flex justify-between border-t border-gray-200 pt-2 text-lg font-bold">
+                <span className="text-gray-900">Total</span>
+                <span className="text-orange-600">{formatCurrency(receipt.total)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <button onClick={handleDownload} className="w-full rounded-xl border border-gray-300 py-3 font-semibold text-gray-700 transition hover:bg-gray-50">
+              Download Receipt
+            </button>
+            <button onClick={handlePrint} className="w-full rounded-xl bg-orange-600 py-3 font-semibold text-white transition hover:bg-orange-700">
+              Print Receipt
+            </button>
+            <button onClick={onClose} className="w-full rounded-xl bg-gray-900 py-3 font-semibold text-white transition hover:bg-black">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

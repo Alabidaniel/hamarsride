@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../src/services/apiClient";
 
 export default function AdminUsers() {
@@ -8,7 +8,7 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -22,11 +22,11 @@ export default function AdminUsers() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, role]);
 
   useEffect(() => {
     loadUsers();
-  }, [role]);
+  }, [loadUsers]);
 
   return (
     <section className="space-y-4">
@@ -88,3 +88,5 @@ export default function AdminUsers() {
     </section>
   );
 }
+
+

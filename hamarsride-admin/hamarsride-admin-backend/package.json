@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
+    "test": "node tests/smoke.test.js",
     "check": "node --check src/server.js && node --check src/app.js && node --check src/routes/authRoutes.js && node --check src/routes/adminRoutes.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "admin:promote": "node scripts/promote-admin.js"
+    "admin:promote": "node scripts/promote-admin.js",
+    "admin:create": "node scripts/create-admin.js"
   },
   "keywords": [],
   "author": "",
@@ -28,3 +30,4 @@
     "zod": "^4.3.6"
   }
 }
+

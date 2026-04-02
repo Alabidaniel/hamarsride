@@ -1,4 +1,7 @@
-﻿const prisma = require("../src/prisma");
+const dotenv = require("dotenv");
+dotenv.config();
+
+const prisma = require("../src/prisma");
 
 async function main() {
   const email = process.argv[2] || process.env.ADMIN_EMAIL;

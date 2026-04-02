@@ -14,9 +14,22 @@ router.post("/login", async (req, res, next) => {
     const { idToken } = loginSchema.parse(req.body);
     const decoded = await getAuth().verifyIdToken(idToken);
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { firebaseUid: decoded.uid },
     });
+
+    if (!user && decoded.email) {
+      const byEmail = await prisma.user.findUnique({
+        where: { email: decoded.email },
+      });
+
+      if (byEmail) {
+        user = await prisma.user.update({
+          where: { id: byEmail.id },
+          data: { firebaseUid: decoded.uid },
+        });
+      }
+    }
 
     if (!user) {
       return res.status(404).json({ error: "User profile not found." });

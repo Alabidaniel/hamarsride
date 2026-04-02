@@ -21,12 +21,21 @@ const paymentsListSchema = listSchema.extend({
 });
 
 const orderListSchema = listSchema.extend({
-  status: z.enum(["pending", "accepted", "picked_up", "processing", "delivered", "cancelled"]).optional(),
+  status: z.enum(["pending", "accepted", "picked_up", "processing", "delivered", "rejected", "cancelled"]).optional(),
   userId: z.string().optional(),
 });
 
 const orderStatusSchema = z.object({
-  status: z.enum(["pending", "accepted", "picked_up", "processing", "delivered", "cancelled"]),
+  status: z.enum(["pending", "accepted", "picked_up", "processing", "delivered", "rejected", "cancelled"]),
+  rejectionReason: z.string().trim().min(1).optional(),
+}).superRefine((data, ctx) => {
+  if (data.status === "rejected" && !data.rejectionReason) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["rejectionReason"],
+      message: "Rejection reason is required.",
+    });
+  }
 });
 
 const updatePaymentSchema = z.object({
@@ -51,6 +60,11 @@ const statusNotifications = {
     title: "Order accepted",
     message: (orderId) => `Your order ${orderId} has been accepted.`,
   },
+  rejected: {
+    title: "Order rejected",
+    message: (orderId, reason) =>
+      `Your order ${orderId} was rejected${reason ? `: ${reason}` : "."}`,
+  },
   picked_up: {
     title: "Order picked up",
     message: (orderId) => `Your order ${orderId} has been picked up by the rider.`,
@@ -69,6 +83,8 @@ const statusNotifications = {
   },
 };
 
+const progressingStatuses = new Set(["accepted", "picked_up", "processing", "delivered"]);
+
 router.use(requireAuth);
 router.use(requireRole(["admin"]));
 
@@ -77,6 +93,7 @@ router.get("/overview", async (_req, res, next) => {
     const [
       totalOrders,
       pendingOrders,
+      rejectedOrders,
       inProgressOrders,
       deliveredOrders,
       totalUsers,
@@ -87,6 +104,7 @@ router.get("/overview", async (_req, res, next) => {
     ] = await Promise.all([
       prisma.order.count(),
       prisma.order.count({ where: { status: "pending" } }),
+      prisma.order.count({ where: { status: "rejected" } }),
       prisma.order.count({ where: { status: { in: ["accepted", "processing", "picked_up"] } } }),
       prisma.order.count({ where: { status: "delivered" } }),
       prisma.user.count(),
@@ -100,6 +118,7 @@ router.get("/overview", async (_req, res, next) => {
       stats: {
         totalOrders,
         pendingOrders,
+        rejectedOrders,
         inProgressOrders,
         deliveredOrders,
         totalUsers,
@@ -135,8 +154,35 @@ router.get("/orders", async (req, res, next) => {
       prisma.order.count({ where }),
     ]);
 
+    const orderIds = orders.map((order) => order.id);
+    const receipts = orderIds.length
+      ? await prisma.receipt.findMany({
+          where: { orderId: { in: orderIds } },
+          select: {
+            id: true,
+            orderId: true,
+            receiptNumber: true,
+            items: true,
+            subtotal: true,
+            deliveryFee: true,
+            total: true,
+            address: true,
+            instruction: true,
+            createdAt: true,
+          },
+        })
+      : [];
+
+    const receiptByOrderId = receipts.reduce((acc, receipt) => {
+      acc[receipt.orderId] = receipt;
+      return acc;
+    }, {});
+
     return res.status(200).json({
-      orders,
+      orders: orders.map((order) => ({
+        ...order,
+        receipt: receiptByOrderId[order.id] || null,
+      })),
       page,
       pageSize,
       total,
@@ -149,12 +195,34 @@ router.get("/orders", async (req, res, next) => {
 
 router.patch("/orders/:id/status", async (req, res, next) => {
   try {
-    const { status } = orderStatusSchema.parse(req.body);
+    const { status, rejectionReason } = orderStatusSchema.parse(req.body);
 
     const order = await prisma.order.findUnique({ where: { id: req.params.id } });
     if (!order) return res.status(404).json({ error: "Order not found." });
 
-    const updated = await prisma.order.update({ where: { id: req.params.id }, data: { status } });
+    if (progressingStatuses.has(status)) {
+      const payment = await prisma.payment.findFirst({
+        where: {
+          orderId: order.id,
+          status: { in: ["submitted", "verified"] },
+        },
+        select: { id: true },
+      });
+
+      if (!payment) {
+        return res.status(409).json({
+          error: "Order must remain incomplete until customer payment is submitted.",
+        });
+      }
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: req.params.id },
+      data: {
+        status,
+        rejectionReason: status === "rejected" ? rejectionReason : null,
+      },
+    });
 
     if (order.status !== status && statusNotifications[status]) {
       const notice = statusNotifications[status];
@@ -162,7 +230,7 @@ router.patch("/orders/:id/status", async (req, res, next) => {
         data: {
           userId: order.userId,
           title: notice.title,
-          message: notice.message(updated.id),
+          message: notice.message(updated.id, rejectionReason),
           type: "order",
         },
       });

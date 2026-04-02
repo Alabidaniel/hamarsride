@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { API_BASE_URL, apiFetch } from "../src/services/apiClient";
 
 const statusOptions = ["submitted", "verified", "rejected"];
@@ -9,7 +9,7 @@ export default function AdminPayments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadPayments = async () => {
+  const loadPayments = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -21,11 +21,11 @@ export default function AdminPayments() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
     loadPayments();
-  }, [statusFilter]);
+  }, [loadPayments]);
 
   const updateStatus = async (payment, status) => {
     const ok = window.confirm(`Mark payment ${payment.id} as ${status}?`);
@@ -105,3 +105,5 @@ export default function AdminPayments() {
     </section>
   );
 }
+
+
