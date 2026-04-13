@@ -1,77 +1,117 @@
-# Deployment
+# Production Deploy
 
-This workspace contains two separate products:
+This repo is wired for a single Ubuntu 22.04 VPS running:
 
-- User app: `hamarsride-user`
-- Admin app: `hamarsride-admin`
+- User frontend on `hamarsride.com`
+- User API on `api.hamarsride.com`
+- Admin frontend on `admin.hamarsride.com`
+- Admin API on `admin-api.hamarsride.com`
 
-Each product has a frontend and a backend.
+## Exact DNS
 
-## Recommended production layout
+Point these `A` records to `69.62.106.79`:
 
-- User frontend: `https://www.your-domain.com`
-- User API: `https://api.your-domain.com`
-- Admin frontend: `https://admin.your-domain.com`
-- Admin API: `https://admin-api.your-domain.com`
+- `hamarsride.com` -> `69.62.106.79`
+- `www.hamarsride.com` -> `69.62.106.79`
+- `api.hamarsride.com` -> `69.62.106.79`
+- `admin.hamarsride.com` -> `69.62.106.79`
+- `admin-api.hamarsride.com` -> `69.62.106.79`
 
-## Build
+## VPS bootstrap
 
-```powershell
-npm run build:user
-npm run build:admin
+Run this as root on the server:
+
+```bash
+bash deploy/vps/bootstrap-ubuntu22.sh
 ```
 
-## Docker Compose
+The script installs:
 
-This repo also includes a one-command deployment option:
+- Node.js LTS
+- Nginx
+- PM2
+- PostgreSQL
+- Git
+- UFW
+- Certbot
 
-```powershell
-docker compose --env-file .env.compose up -d --build
+It also:
+
+- Creates a non-root sudo user
+- Enables firewall rules for `22`, `80`, and `443`
+- Creates the PostgreSQL database and role
+
+## Production config
+
+Copy [deploy/production.env.example] to [deploy/production.env] and fill in the real values.
+
+Required values:
+
+- `DOMAIN`
+- `API_DOMAIN`
+- `ADMIN_DOMAIN`
+- `ADMIN_API_DOMAIN`
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `LE_EMAIL`
+
+## App layout on the VPS
+
+The deploy script wires these paths under `/var/www`:
+
+- `/var/www/hamarsride-user-frontend`
+- `/var/www/hamarsride-user-backend`
+- `/var/www/hamarsride-admin-frontend`
+- `/var/www/hamarsride-admin-backend`
+
+## Production deploy
+
+From the repo root on the VPS:
+
+```bash
+bash deploy/vps/deploy-production.sh
 ```
 
-Copy [.env.compose.example](/c:/Users/user/OneDrive/Desktop/Desktop/HAMMARSRIDE/.env.compose.example) to `.env.compose` first and set the real credentials and public URLs for your server.
+What it does:
 
-The compose stack brings up:
+- Symlinks the four app roots into `/var/www`
+- Writes backend `.env` files
+- Writes frontend `.env.production` files
+- Installs dependencies
+- Runs Prisma generate and migrate deploy
+- Builds both React frontends
+- Installs the Nginx config
+- Starts or reloads PM2
+- Requests SSL certificates with Certbot when `LE_EMAIL` is set
 
-- MySQL
-- user backend
-- admin backend
-- user frontend
-- admin frontend
+## PM2
 
-## Run backends
+The PM2 ecosystem file uses:
 
-Use PM2 or another process manager for the two backends.
-
-The included PM2 file is `deploy/ecosystem.config.cjs`.
+- User backend on port `5000`
+- Admin backend on port `5001`
 
 ## Nginx
 
-Use static hosting for the built frontends and reverse proxy the API hosts to the backend ports.
+The provided [deploy/nginx.conf.example] template:
 
-An example Nginx setup is in `deploy/nginx.conf.example`.
+- Forces HTTPS
+- Proxies APIs
+- Serves static frontend builds
+- Enables gzip
+- Adds security headers
+- Uses caching for static assets
 
-## Environment variables
+## Database
 
-Set these before starting production services:
+Both backends use the same PostgreSQL instance through `DATABASE_URL`.
 
-- User backend
-  - `PORT=5000`
-  - `DATABASE_URL=...`
-  - `CORS_ORIGINS=https://www.your-domain.com,https://admin.your-domain.com`
-  - `GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json`
-  - `USER_UPLOADS_DIR=/var/www/hamarsride-user-uploads`
-- User frontend
-  - `VITE_API_BASE_URL=https://api.your-domain.com/api`
-- Admin backend
-  - `PORT=5501`
-  - `DATABASE_URL=...`
-  - `CORS_ORIGINS=https://admin.your-domain.com`
-  - `GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceAccountKey.json`
-  - `ADMIN_UPLOADS_DIR=/var/www/hamarsride-admin-uploads`
-- Admin frontend
-  - `VITE_API_BASE_URL=https://admin-api.your-domain.com`
+The user backend owns the migration history, so `prisma migrate deploy` runs there during production deploy.
 
-## Important note
+## SSL renewal
 
-Rejected orders are now a real order state. The admin must supply a rejection reason, and the user-facing UI should render `rejected` instead of leaving an order stuck on `pending`.
+Certbot installs auto-renewal. Verify with:
+
+```bash
+certbot renew --dry-run
+```

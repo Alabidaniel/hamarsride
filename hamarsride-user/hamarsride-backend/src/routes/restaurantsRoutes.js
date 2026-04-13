@@ -63,6 +63,30 @@ const SHOP_NAMES = new Set(["Vibrant Food Mart", "Shop With Rahma"]);
 const getBusinessTypeForName = (name) => (SHOP_NAMES.has(name) ? "shop" : "restaurant");
 const getRequestedBusinessType = (req) => (req.baseUrl.endsWith("/shops") ? "shop" : "restaurant");
 const getBusinessLabel = (type) => (type === "shop" ? "Shop" : "Restaurant");
+const getLagosTimeParts = (date = new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Lagos",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  return parts.reduce((acc, part) => {
+    if (part.type === "hour") acc.hour = Number(part.value);
+    if (part.type === "minute") acc.minute = Number(part.value);
+    return acc;
+  }, { hour: 0, minute: 0 });
+};
+
+const isWithinOperatingHours = (date = new Date()) => {
+  const { hour, minute } = getLagosTimeParts(date);
+  const currentMinutes = hour * 60 + minute;
+  const openingMinutes = 8 * 60;
+  const closingMinutes = 23 * 60;
+  return currentMinutes >= openingMinutes && currentMinutes < closingMinutes;
+};
+
+const getEffectiveOpenStatus = (restaurant, date = new Date()) => Boolean(restaurant?.open) && isWithinOperatingHours(date);
 let seedRestaurantsPromise = null;
 
 const seedRestaurantsInternal = async () => {
@@ -189,6 +213,33 @@ const seedRestaurantsInternal = async () => {
       type: "restaurant",
       image: ONLINE_IMAGES.rice,
       rating: 4.5,
+      time: "20-35 mins",
+      fee: "N1000",
+      open: true,
+    },
+    {
+      name: "Taste of Home Kitchen",
+      type: "restaurant",
+      image: ONLINE_IMAGES.rice,
+      rating: 4.7,
+      time: "20-35 mins",
+      fee: "N1000",
+      open: true,
+    },
+    {
+      name: "CAKEBYDAVCEC KITCHEN",
+      type: "restaurant",
+      image: ONLINE_IMAGES.rice,
+      rating: 4.6,
+      time: "20-35 mins",
+      fee: "N1000",
+      open: true,
+    },
+    {
+      name: "OJ Treats",
+      type: "restaurant",
+      image: ONLINE_IMAGES.rice,
+      rating: 4.6,
       time: "20-35 mins",
       fee: "N1000",
       open: true,
@@ -1715,6 +1766,7 @@ const seedMenu = async (restaurant) => {
 
   if (restaurant.name === "De Unique Kitchen") {
     const deUniqueMenu = [
+      { name: "Take Away", price: 300 },
       { name: "Jollof Rice", price: 400 },
       { name: "Fried Rice", price: 400 },
       { name: "White Rice", price: 400 },
@@ -1726,10 +1778,17 @@ const seedMenu = async (restaurant) => {
       { name: "Fufu", price: 200 },
       { name: "Eba", price: 200 },
       { name: "Pounded Yam", price: 400 },
+      { name: "Egusi", price: 200 },
+      { name: "Efo", price: 200 },
+      { name: "Ogbono", price: 200 },
+      { name: "Ewedu", price: 0 },
+      { name: "Gbegiri", price: 0 },
+      { name: "Okro", price: 0 },
       { name: "Goat Meat", price: 2000 },
       { name: "Chicken", price: 2000 },
       { name: "Beef", price: 200 },
       { name: "Ponmo", price: 200 },
+      { name: "Assorted Meat", price: 2000 },
       { name: "Titus Fish", price: 1000 },
       { name: "Turkey", price: 4000 },
     ];
@@ -1740,7 +1799,8 @@ const seedMenu = async (restaurant) => {
       ...mapNamesToImage(["Beans"], ONLINE_IMAGES.egusi),
       ...mapNamesToImage(["Spaghetti"], ONLINE_IMAGES.spaghetti),
       ...mapNamesToImage(["Amala", "Semo", "Fufu", "Eba", "Pounded Yam"], ONLINE_IMAGES.egusi),
-      ...mapNamesToImage(["Goat Meat", "Beef", "Ponmo"], ONLINE_IMAGES.grilledMeat),
+      ...mapNamesToImage(["Egusi", "Efo", "Ogbono", "Ewedu", "Gbegiri", "Okro"], ONLINE_IMAGES.egusi),
+      ...mapNamesToImage(["Goat Meat", "Beef", "Ponmo", "Assorted Meat"], ONLINE_IMAGES.grilledMeat),
       ...mapNamesToImage(["Chicken"], ONLINE_IMAGES.grilledChicken),
       ...mapNamesToImage(["Titus Fish"], ONLINE_IMAGES.grilledFish),
       ...mapNamesToImage(["Turkey"], ONLINE_IMAGES.grilledChicken),
@@ -1871,6 +1931,495 @@ const seedMenu = async (restaurant) => {
     return;
   }
 
+  if (restaurant.name === "Taste of Home Kitchen") {
+    const tasteOfHomeMenu = [
+      { name: "Jollof Rice and Fried Rice with Beef", price: 2200 },
+      { name: "Jollof Rice and Fried Rice with Chicken", price: 3000 },
+      { name: "White Rice and Beans with Beef", price: 2400 },
+      { name: "Spaghetti Stir Fry with Chicken", price: 3000 },
+      { name: "Spaghetti Stir Fry with Beef", price: 2200 },
+      { name: "Noodles with Omelette", price: 2000 },
+      { name: "Noodles with Chicken", price: 3000 },
+      { name: "Yam Porridge with Chicken", price: 2800 },
+      { name: "Yam Porridge with Beef", price: 1800 },
+      { name: "Fried Yam with Scrambled Egg", price: 2200 },
+      { name: "Boiled Yam with Scrambled Egg", price: 2000 },
+      { name: "Chicken and Chips", price: 5200 },
+      { name: "Chicken Nuggets", price: 9500 },
+      { name: "Plantain", price: 600 },
+      { name: "Salad", price: 600 },
+      { name: "Beef", price: 500 },
+      { name: "Chicken", price: 1800 },
+      { name: "Goat Meat", price: 2000 },
+      { name: "Peppered Ponmo", price: 500 },
+      { name: "Semo (per wrap)", price: 300 },
+      { name: "Pounded Yam (per wrap)", price: 400 },
+      {
+        name: "Premium Treat Combo",
+        price: 6000,
+        description: "Includes Chicken & Chips, Salad, and Drink.",
+      },
+      {
+        name: "Quick Bite Combo",
+        price: 2500,
+        description: "Includes Noodles + Omelette and Plantain.",
+      },
+      {
+        name: "Classic Naija Combo",
+        price: 3000,
+        description: "Includes Jollof Rice, Fried Rice, Beef, and Plantain.",
+      },
+    ];
+
+    const tasteOfHomeImageMap = {
+      ...mapNamesToImage(
+        [
+          "Jollof Rice and Fried Rice with Beef",
+          "Jollof Rice and Fried Rice with Chicken",
+          "White Rice and Beans with Beef",
+          "Classic Naija Combo",
+        ],
+        ONLINE_IMAGES.rice
+      ),
+      ...mapNamesToImage(["Spaghetti Stir Fry with Chicken", "Spaghetti Stir Fry with Beef"], ONLINE_IMAGES.spaghetti),
+      ...mapNamesToImage(["Noodles with Omelette", "Noodles with Chicken"], ONLINE_IMAGES.spaghetti),
+      ...mapNamesToImage(
+        [
+          "Yam Porridge with Chicken",
+          "Yam Porridge with Beef",
+          "Fried Yam with Scrambled Egg",
+          "Boiled Yam with Scrambled Egg",
+        ],
+        ONLINE_IMAGES.yamFries
+      ),
+      ...mapNamesToImage(["Chicken and Chips", "Chicken Nuggets", "Premium Treat Combo"], ONLINE_IMAGES.grilledChicken),
+      ...mapNamesToImage(["Plantain", "Salad", "Quick Bite Combo"], ONLINE_IMAGES.coleslaw),
+      ...mapNamesToImage(["Beef", "Goat Meat", "Peppered Ponmo"], ONLINE_IMAGES.grilledMeat),
+      ...mapNamesToImage(["Chicken"], ONLINE_IMAGES.grilledChicken),
+      ...mapNamesToImage(["Semo (per wrap)", "Pounded Yam (per wrap)"], ONLINE_IMAGES.egusi),
+    };
+
+    const existingItems = await prisma.menuItem.findMany({
+      where: { restaurantId: restaurant.id },
+      select: { id: true, name: true },
+    });
+
+    if (existingItems.length > 0) {
+      const tasteOfHomeByName = new Map(tasteOfHomeMenu.map((item) => [item.name, item]));
+      const existingByName = new Map(existingItems.map((item) => [item.name, item]));
+
+      await Promise.all(
+        existingItems.map((existingItem) => {
+          const matchedItem = tasteOfHomeByName.get(existingItem.name);
+          if (matchedItem) {
+            return prisma.menuItem.update({
+              where: { id: existingItem.id },
+              data: {
+                price: matchedItem.price,
+                description: matchedItem.description,
+                image: getExactImage(matchedItem.name, tasteOfHomeImageMap, ONLINE_IMAGES.rice),
+              },
+            });
+          }
+
+          return prisma.menuItem.update({
+            where: { id: existingItem.id },
+            data: { image: ONLINE_IMAGES.rice },
+          });
+        })
+      );
+
+      const missingItems = tasteOfHomeMenu.filter((item) => !existingByName.has(item.name));
+      if (missingItems.length > 0) {
+        await prisma.menuItem.createMany({
+          data: missingItems.map((item) => ({
+            restaurantId: restaurant.id,
+            ...item,
+            image: getExactImage(item.name, tasteOfHomeImageMap, ONLINE_IMAGES.rice),
+          })),
+        });
+      }
+      return;
+    }
+
+    await prisma.menuItem.createMany({
+      data: tasteOfHomeMenu.map((item) => ({
+        restaurantId: restaurant.id,
+        ...item,
+        image: getExactImage(item.name, tasteOfHomeImageMap, ONLINE_IMAGES.rice),
+      })),
+    });
+    return;
+  }
+
+  if (restaurant.name === "CAKEBYDAVCEC KITCHEN") {
+    const cakeByDavcecMenu = [
+      { name: "Jollof Rice and Fried Rice (Full Plate) with Chicken and Plantain", price: 4500 },
+      { name: "Jollof Rice and Fried Rice (Normal Plate) with Chicken", price: 3000 },
+      { name: "Jollof Rice and Fried Rice (Full Plate) with 2 Beef", price: 2500 },
+      { name: "Jollof Rice and Fried Rice (Normal Plate) with 2 Beef", price: 2000 },
+      { name: "Jollof Rice and Fried Rice (Full Plate) with Turkey", price: 5500 },
+      { name: "Jollof Rice and Fried Rice (Normal Plate) with Turkey", price: 4000 },
+      { name: "White Rice and Stew (Full Plate) with Chicken", price: 4500 },
+      { name: "White Rice and Stew (Normal Plate) with Chicken", price: 3000 },
+      { name: "White Rice and Stew (Full Plate) with 2 Beef", price: 2500 },
+      { name: "White Rice and Stew (Normal Plate) with 2 Beef", price: 2000 },
+      { name: "White Rice and Stew (Full Plate) with Turkey", price: 5500 },
+      { name: "White Rice and Stew (Normal Plate) with Turkey", price: 4000 },
+      { name: "Ewa Aganyin with Round Fish, Plantain and Ponmo", price: 2500 },
+      { name: "Beef", price: 200 },
+      { name: "Egg", price: 300 },
+      { name: "Gizzard", price: 200 },
+      { name: "Titus Fish", price: 700 },
+      { name: "Gizdodo", price: 3000 },
+      { name: "Sawa Fish", price: 500 },
+      { name: "Croaker Fish", price: 2000 },
+      { name: "Asorted Meat", price: 2000 },
+      { name: "Big Chicken", price: 3000 },
+      { name: "Small Chicken", price: 1500 },
+      { name: "Big Turkey", price: 5000 },
+      { name: "Small Turkey", price: 2500 },
+    ];
+
+    const cakeByDavcecImageMap = {
+      ...mapNamesToImage(
+        [
+          "Jollof Rice and Fried Rice (Full Plate) with Chicken and Plantain",
+          "Jollof Rice and Fried Rice (Normal Plate) with Chicken",
+          "Jollof Rice and Fried Rice (Full Plate) with 2 Beef",
+          "Jollof Rice and Fried Rice (Normal Plate) with 2 Beef",
+          "Jollof Rice and Fried Rice (Full Plate) with Turkey",
+          "Jollof Rice and Fried Rice (Normal Plate) with Turkey",
+          "White Rice and Stew (Full Plate) with Chicken",
+          "White Rice and Stew (Normal Plate) with Chicken",
+          "White Rice and Stew (Full Plate) with 2 Beef",
+          "White Rice and Stew (Normal Plate) with 2 Beef",
+          "White Rice and Stew (Full Plate) with Turkey",
+          "White Rice and Stew (Normal Plate) with Turkey",
+          "Ewa Aganyin with Round Fish, Plantain and Ponmo",
+          "Gizdodo",
+        ],
+        ONLINE_IMAGES.rice
+      ),
+      ...mapNamesToImage(["Big Chicken", "Small Chicken", "Egg"], ONLINE_IMAGES.grilledChicken),
+      ...mapNamesToImage(["Beef", "Gizzard", "Asorted Meat", "Big Turkey", "Small Turkey"], ONLINE_IMAGES.grilledMeat),
+      ...mapNamesToImage(["Titus Fish", "Sawa Fish", "Croaker Fish"], ONLINE_IMAGES.grilledFish),
+    };
+
+    const existingItems = await prisma.menuItem.findMany({
+      where: { restaurantId: restaurant.id },
+      select: { id: true, name: true },
+    });
+
+    if (existingItems.length > 0) {
+      const cakeByDavcecByName = new Map(cakeByDavcecMenu.map((item) => [item.name, item]));
+      const existingByName = new Map(existingItems.map((item) => [item.name, item]));
+
+      await Promise.all(
+        existingItems.map((existingItem) => {
+          const matchedItem = cakeByDavcecByName.get(existingItem.name);
+          if (matchedItem) {
+            return prisma.menuItem.update({
+              where: { id: existingItem.id },
+              data: {
+                price: matchedItem.price,
+                image: getExactImage(matchedItem.name, cakeByDavcecImageMap, ONLINE_IMAGES.rice),
+              },
+            });
+          }
+
+          return prisma.menuItem.update({
+            where: { id: existingItem.id },
+            data: { image: ONLINE_IMAGES.rice },
+          });
+        })
+      );
+
+      const missingItems = cakeByDavcecMenu.filter((item) => !existingByName.has(item.name));
+      if (missingItems.length > 0) {
+        await prisma.menuItem.createMany({
+          data: missingItems.map((item) => ({
+            restaurantId: restaurant.id,
+            ...item,
+            image: getExactImage(item.name, cakeByDavcecImageMap, ONLINE_IMAGES.rice),
+          })),
+        });
+      }
+      return;
+    }
+
+    await prisma.menuItem.createMany({
+      data: cakeByDavcecMenu.map((item) => ({
+        restaurantId: restaurant.id,
+        ...item,
+        image: getExactImage(item.name, cakeByDavcecImageMap, ONLINE_IMAGES.rice),
+      })),
+    });
+    return;
+  }
+
+  if (restaurant.name === "OJ Treats") {
+    const ojTreatsMenu = [
+      { name: "Egg", price: 500 },
+      { name: "Salad", price: 500 },
+      { name: "Plantain", price: 500 },
+      { name: "Sausage", price: 500 },
+      { name: "Extra White Rice", price: 1000 },
+      { name: "Sauced Ponmo", price: 2500 },
+      { name: "Sauced Ponmo and Plantain", price: 3000 },
+      { name: "Sauced Gizzard", price: 3000 },
+      { name: "Sauced Gizdodo", price: 3500 },
+      { name: "Sauced Turkey", price: 5500 },
+      { name: "Sauced Chicken", price: 5500 },
+      { name: "Sauced Turkey Finger", price: 5000 },
+      { name: "Plantain and Egg", price: 3500 },
+      { name: "Plantain, Egg and Salad", price: 4000 },
+      { name: "Plantain and Chicken Wings", price: 4500 },
+      { name: "Plantain and Chicken Wings with Egg", price: 5000 },
+      { name: "Plantain and Chicken", price: 4000 },
+      { name: "Plantain, Egg and Chicken", price: 4500 },
+      { name: "Plantain, Chicken and Salad", price: 4500 },
+      { name: "Plantain and Turkey", price: 4000 },
+      { name: "Plantain, Egg and Turkey", price: 4300 },
+      { name: "Plantain, Turkey and Salad", price: 2000 },
+      { name: "Chips", price: 4500 },
+      { name: "Chips and Egg", price: 3000 },
+      { name: "Chips and Chicken Wings", price: 5000 },
+      { name: "Chicken/Beef and Chips", price: 4000 },
+      { name: "Chips and Turkey", price: 4000 },
+      { name: "Fried Yam and Egg with Sauces", price: 3500 },
+      { name: "Fried Yam and Ponmo with Sauces", price: 4000 },
+      { name: "Fried Yam and Chicken/Beef with Sauces", price: 5000 },
+      { name: "Fried Yam and Chicken/Beef Egg with Sauces", price: 6000 },
+      { name: "Fried Yam and Chicken Wings with Sauces", price: 5500 },
+      { name: "Fried Yam and Chicken Wings Egg with Sauces", price: 6500 },
+      { name: "Fried Yam and Turkey with Sauces", price: 5000 },
+      { name: "Fried Yam and Turkey Egg with Sauces", price: 6000 },
+      { name: "Boiled Yam and Stew", price: 2500 },
+      { name: "Boiled Yam and Stew with Ponmo", price: 3500 },
+      { name: "Boiled Yam and Egg Sauces", price: 3000 },
+      { name: "Boiled Yam, Egg Sauces with Ponmo", price: 4000 },
+      { name: "Boiled Yam and Chicken/Beef with Egg Sauces", price: 5500 },
+      { name: "Boiled Yam and Chicken Wings with Egg Sauces", price: 6000 },
+      { name: "Boiled Yam and Turkey with Egg Sauces", price: 5500 },
+      { name: "Pepper Soup Chicken", price: 8000 },
+      { name: "Assorted Pepper Soup", price: 8000 },
+      { name: "Bokoto", price: 8000 },
+      { name: "Chicken Wings", price: 4000 },
+      { name: "Pepper Beef", price: 4000 },
+      { name: "White Rice with Beef", price: 3000 },
+      { name: "White Rice with Small Chicken", price: 3000 },
+      { name: "White Rice with Big Chicken", price: 4000 },
+      { name: "White Rice with Turkey", price: 4000 },
+      { name: "White Rice with Chicken Wings", price: 4500 },
+      { name: "Extra Jollof and Fried Rice", price: 1000 },
+      { name: "Jollof Rice & Fried Rice with Beef", price: 3000 },
+      { name: "Jollof Rice & Fried Rice with Small Chicken", price: 3000 },
+      { name: "Jollof Rice & Fried Rice with Big Chicken", price: 4000 },
+      { name: "Jollof Rice & Fried Rice with Big Turkey", price: 4000 },
+      { name: "Jollof Rice & Fried Rice with Chicken Wings", price: 4500 },
+      { name: "Extra Spag/Noodles", price: 500 },
+      { name: "Noodles/Spag/Macaroni and Egg with Plantain", price: 3000 },
+      { name: "Noodles/Spag/Macaroni and Egg with Plantain & Salad", price: 3500 },
+      { name: "Noodles/Spag/Macaroni and Small Chicken", price: 3000 },
+      { name: "Noodles/Spag/Macaroni and Small Chicken with Plantain", price: 3500 },
+      { name: "Noodles/Spag/Macaroni and Chicken Wings", price: 4500 },
+      { name: "Noodles/Spag/Macaroni and Chicken Wings with Plantain", price: 5000 },
+      { name: "Noodles/Spag/Macaroni and Big Chicken/Beef", price: 4000 },
+      { name: "Noodles/Spag/Macaroni and Big Chicken/Beef with Plantain", price: 4500 },
+      { name: "Noodles/Spag/Macaroni and Turkey", price: 4000 },
+      { name: "Noodles/Spag/Macaroni and Turkey with Plantain", price: 4500 },
+      { name: "Noodles/Spag/Macaroni and Gizzard", price: 4000 },
+      { name: "Noodles/Spag/Macaroni with Chicken/Beef and Gizzard", price: 5500 },
+      { name: "Noodles/Spag/Macaroni with Chicken Wings and Gizzard", price: 6000 },
+      { name: "Noodles/Spag/Macaroni with Turkey and Gizzard", price: 5500 },
+      { name: "Chicken Shawarma", price: 2500 },
+      { name: "Chicken Shawarma with 1 Sausage", price: 3000 },
+      { name: "Chicken Shawarma with 2 Sausage", price: 3500 },
+      { name: "Chicken Shawarma with 3 Sausage", price: 4000 },
+      { name: "Extra Chicken", price: 1500 },
+      { name: "Extra Beef", price: 1500 },
+      { name: "Beef Shawarma", price: 2700 },
+      { name: "Beef Shawarma with 1 Sausage", price: 3200 },
+      { name: "Beef Shawarma with 2 Sausage", price: 3700 },
+      { name: "Beef Shawarma with 3 Sausage", price: 4200 },
+      { name: "Mixed Shawarma", price: 3200 },
+      { name: "Mixed Shawarma with 1 Sausage", price: 3700 },
+      { name: "Mixed Shawarma with 2 Sausage", price: 4200 },
+      { name: "Zobo", price: 500 },
+      { name: "Banana Smoothie", price: 2500 },
+      { name: "Banana-Pineapple Smoothie", price: 2500 },
+      { name: "Yummy Combo", price: 2500 },
+      { name: "Bottle Water", price: 200 },
+    ];
+
+    const ojTreatsImageMap = {
+      ...mapNamesToImage(
+        [
+          "Egg",
+          "Salad",
+          "Plantain",
+          "Sausage",
+          "Extra White Rice",
+          "Plantain and Egg",
+          "Plantain, Egg and Salad",
+          "Plantain and Chicken Wings",
+          "Plantain and Chicken Wings with Egg",
+          "Plantain and Chicken",
+          "Plantain, Egg and Chicken",
+          "Plantain, Chicken and Salad",
+          "Plantain and Turkey",
+          "Plantain, Egg and Turkey",
+          "Plantain, Turkey and Salad",
+        ],
+        ONLINE_IMAGES.rice
+      ),
+      ...mapNamesToImage(
+        [
+          "Sauced Ponmo",
+          "Sauced Ponmo and Plantain",
+          "Sauced Gizzard",
+          "Sauced Gizdodo",
+          "Sauced Turkey",
+          "Sauced Chicken",
+          "Sauced Turkey Finger",
+          "Pepper Soup Chicken",
+          "Assorted Pepper Soup",
+          "Bokoto",
+          "Pepper Beef",
+          "Chicken Wings",
+          "Chicken/Beef and Chips",
+          "Chicken Shawarma",
+          "Chicken Shawarma with 1 Sausage",
+          "Chicken Shawarma with 2 Sausage",
+          "Chicken Shawarma with 3 Sausage",
+          "Extra Chicken",
+          "Extra Beef",
+          "Beef Shawarma",
+          "Beef Shawarma with 1 Sausage",
+          "Beef Shawarma with 2 Sausage",
+          "Beef Shawarma with 3 Sausage",
+          "Mixed Shawarma",
+          "Mixed Shawarma with 1 Sausage",
+          "Mixed Shawarma with 2 Sausage",
+        ],
+        ONLINE_IMAGES.grilledChicken
+      ),
+      ...mapNamesToImage(
+        [
+          "Chips",
+          "Chips and Egg",
+          "Chips and Chicken Wings",
+          "Chips and Turkey",
+          "Fried Yam and Egg with Sauces",
+          "Fried Yam and Ponmo with Sauces",
+          "Fried Yam and Chicken/Beef with Sauces",
+          "Fried Yam and Chicken/Beef Egg with Sauces",
+          "Fried Yam and Chicken Wings with Sauces",
+          "Fried Yam and Chicken Wings Egg with Sauces",
+          "Fried Yam and Turkey with Sauces",
+          "Fried Yam and Turkey Egg with Sauces",
+          "Boiled Yam and Stew",
+          "Boiled Yam and Stew with Ponmo",
+          "Boiled Yam and Egg Sauces",
+          "Boiled Yam, Egg Sauces with Ponmo",
+          "Boiled Yam and Chicken/Beef with Egg Sauces",
+          "Boiled Yam and Chicken Wings with Egg Sauces",
+          "Boiled Yam and Turkey with Egg Sauces",
+        ],
+        ONLINE_IMAGES.yamFries
+      ),
+      ...mapNamesToImage(
+        [
+          "White Rice with Beef",
+          "White Rice with Small Chicken",
+          "White Rice with Big Chicken",
+          "White Rice with Turkey",
+          "White Rice with Chicken Wings",
+          "Extra Jollof and Fried Rice",
+          "Jollof Rice & Fried Rice with Beef",
+          "Jollof Rice & Fried Rice with Small Chicken",
+          "Jollof Rice & Fried Rice with Big Chicken",
+          "Jollof Rice & Fried Rice with Big Turkey",
+          "Jollof Rice & Fried Rice with Chicken Wings",
+        ],
+        ONLINE_IMAGES.rice
+      ),
+      ...mapNamesToImage(
+        [
+          "Extra Spag/Noodles",
+          "Noodles/Spag/Macaroni and Egg with Plantain",
+          "Noodles/Spag/Macaroni and Egg with Plantain & Salad",
+          "Noodles/Spag/Macaroni and Small Chicken",
+          "Noodles/Spag/Macaroni and Small Chicken with Plantain",
+          "Noodles/Spag/Macaroni and Chicken Wings",
+          "Noodles/Spag/Macaroni and Chicken Wings with Plantain",
+          "Noodles/Spag/Macaroni and Big Chicken/Beef",
+          "Noodles/Spag/Macaroni and Big Chicken/Beef with Plantain",
+          "Noodles/Spag/Macaroni and Turkey",
+          "Noodles/Spag/Macaroni and Turkey with Plantain",
+          "Noodles/Spag/Macaroni and Gizzard",
+          "Noodles/Spag/Macaroni with Chicken/Beef and Gizzard",
+          "Noodles/Spag/Macaroni with Chicken Wings and Gizzard",
+          "Noodles/Spag/Macaroni with Turkey and Gizzard",
+        ],
+        ONLINE_IMAGES.spaghetti
+      ),
+      ...mapNamesToImage(["Zobo", "Banana Smoothie", "Banana-Pineapple Smoothie", "Yummy Combo", "Bottle Water"], ONLINE_IMAGES.soda),
+    };
+
+    const existingItems = await prisma.menuItem.findMany({
+      where: { restaurantId: restaurant.id },
+      select: { id: true, name: true },
+    });
+
+    if (existingItems.length > 0) {
+      const ojTreatsByName = new Map(ojTreatsMenu.map((item) => [item.name, item]));
+      const existingByName = new Map(existingItems.map((item) => [item.name, item]));
+
+      await Promise.all(
+        existingItems.map((existingItem) => {
+          const matchedItem = ojTreatsByName.get(existingItem.name);
+          if (matchedItem) {
+            return prisma.menuItem.update({
+              where: { id: existingItem.id },
+              data: {
+                price: matchedItem.price,
+                image: getExactImage(matchedItem.name, ojTreatsImageMap, ONLINE_IMAGES.rice),
+              },
+            });
+          }
+
+          return prisma.menuItem.update({
+            where: { id: existingItem.id },
+            data: { image: ONLINE_IMAGES.rice },
+          });
+        })
+      );
+
+      const missingItems = ojTreatsMenu.filter((item) => !existingByName.has(item.name));
+      if (missingItems.length > 0) {
+        await prisma.menuItem.createMany({
+          data: missingItems.map((item) => ({
+            restaurantId: restaurant.id,
+            ...item,
+            image: getExactImage(item.name, ojTreatsImageMap, ONLINE_IMAGES.rice),
+          })),
+        });
+      }
+      return;
+    }
+
+    await prisma.menuItem.createMany({
+      data: ojTreatsMenu.map((item) => ({
+        restaurantId: restaurant.id,
+        ...item,
+        image: getExactImage(item.name, ojTreatsImageMap, ONLINE_IMAGES.rice),
+      })),
+    });
+    return;
+  }
+
   if (count > 0) return;
 
   await prisma.menuItem.createMany({
@@ -1975,10 +2524,12 @@ const getJJBistroCategory = (name) => {
 
 const getDeUniqueCategory = (name) => {
   const lower = name.toLowerCase();
+  if (lower === "take away") return "Extras";
   if (lower.includes("jollof rice") || lower.includes("fried rice") || lower.includes("white rice") || lower.includes("yam porridge")) return "Rice & Yam Dishes";
   if (lower === "beans" || lower === "spaghetti") return "Beans & Pasta";
   if (lower === "amala" || lower === "semo" || lower === "fufu" || lower === "eba" || lower === "pounded yam") return "Swallows";
-  if (lower === "goat meat" || lower === "chicken" || lower === "beef" || lower === "ponmo" || lower === "titus fish" || lower === "turkey") return "Proteins";
+  if (lower === "egusi" || lower === "efo" || lower === "ogbono" || lower === "ewedu" || lower === "gbegiri" || lower === "okro") return "Soups";
+  if (lower === "goat meat" || lower === "chicken" || lower === "beef" || lower === "ponmo" || lower === "assorted meat" || lower === "titus fish" || lower === "turkey") return "Proteins";
   return "Other";
 };
 
@@ -1986,6 +2537,63 @@ const getDailyTreatCategory = (name) => {
   const lower = name.toLowerCase();
   if (lower.includes("jollof") || lower.includes("fried rice")) return "Rice Meals";
   if (lower.includes("spaghetti")) return "Pasta";
+  return "Other";
+};
+
+const getTasteOfHomeCategory = (name) => {
+  const lower = name.toLowerCase();
+  if (lower.includes("combo")) return "Combos";
+  if (lower.includes("semo") || lower.includes("pounded yam")) return "Swallow";
+  if (lower.includes("plantain") || lower.includes("salad") || lower === "beef" || lower === "chicken" || lower.includes("goat meat") || lower.includes("ponmo")) {
+    return "Extras";
+  }
+  if (lower.includes("spaghetti")) return "Pasta";
+  if (lower.includes("noodles")) return "Noodles";
+  if (lower.includes("yam")) return "Yam";
+  if (lower.includes("chips") || lower.includes("nuggets")) return "Fast Food";
+  if (lower.includes("rice") || lower.includes("beans")) return "Rice";
+  return "Other";
+};
+
+const getCakeByDavcecCategory = (name) => {
+  const lower = name.toLowerCase();
+  if (lower.includes("jollof rice") || lower.includes("white rice") || lower.includes("ewa aganyin")) return "Rice Meals";
+  if (
+    lower === "beef" ||
+    lower === "egg" ||
+    lower === "gizzard" ||
+    lower.includes("fish") ||
+    lower.includes("gizdodo") ||
+    lower.includes("meat") ||
+    lower.includes("chicken") ||
+    lower.includes("turkey")
+  ) {
+    return "Proteins";
+  }
+  return "Other";
+};
+
+const getOJTreatsCategory = (name) => {
+  const lower = name.toLowerCase();
+  if (lower === "egg" || lower === "salad" || lower === "plantain" || lower === "sausage" || lower.includes("extra white rice") || lower.includes("extra chicken") || lower.includes("extra beef")) {
+    return "Extras";
+  }
+  if (lower.includes("sauced")) return "Sauced Items";
+  if (
+    (lower.includes("plantain") && lower.includes("egg")) ||
+    (lower.includes("plantain") && lower.includes("chicken")) ||
+    (lower.includes("plantain") && lower.includes("turkey")) ||
+    (lower.includes("plantain") && lower.includes("salad"))
+  ) {
+    return "Plantain Combos";
+  }
+  if (lower.includes("chips")) return "Chips";
+  if (lower.includes("yam")) return "Yam Dishes";
+  if (lower.includes("pepper soup") || lower.includes("bokoto") || lower.includes("wings") || lower.includes("beef")) return "Soups & Proteins";
+  if (lower.includes("rice")) return "Rice Dishes";
+  if (lower.includes("noodles") || lower.includes("spag") || lower.includes("macaroni")) return "Noodles & Pasta";
+  if (lower.includes("shawarma")) return "Shawarma";
+  if (lower.includes("zobo") || lower.includes("smoothie") || lower.includes("water") || lower.includes("combo")) return "Drinks";
   return "Other";
 };
 
@@ -2062,6 +2670,15 @@ const getMenuCategory = (restaurantName, itemName) => {
   if (restaurantName === "Daily Treat") {
     return getDailyTreatCategory(itemName);
   }
+  if (restaurantName === "Taste of Home Kitchen") {
+    return getTasteOfHomeCategory(itemName);
+  }
+  if (restaurantName === "CAKEBYDAVCEC KITCHEN") {
+    return getCakeByDavcecCategory(itemName);
+  }
+  if (restaurantName === "OJ Treats") {
+    return getOJTreatsCategory(itemName);
+  }
   return getCategory(itemName);
 };
 
@@ -2080,34 +2697,27 @@ const sortCategoryEntries = (categoriesObj, restaurantName) => {
   const rahmaOrder = ["Groceries", "Other"];
   const ibileOrder = ["Rice Meals", "Proteins", "Sides", "Extras", "Other"];
   const jjBistroOrder = ["Rice Dishes", "Grills & Specials", "Pasta & Noodles", "Sandwiches", "Soups & Swallows", "Add-Ons", "Other"];
-  const deUniqueOrder = ["Rice & Yam Dishes", "Beans & Pasta", "Swallows", "Proteins", "Other"];
+  const deUniqueOrder = ["Rice & Yam Dishes", "Beans & Pasta", "Swallows", "Soups", "Proteins", "Extras", "Other"];
   const dailyTreatOrder = ["Rice Meals", "Pasta", "Other"];
-  const preferredOrder =
-    restaurantName === "Item7go"
-      ? item7goOrder
-      : restaurantName === "Hollar Lee Express Meal"
-        ? hollarOrder
-        : restaurantName === "Mide Pastries"
-          ? mideOrder
-          : restaurantName === "Fola Juice & Parfait"
-            ? folaOrder
-            : restaurantName === "Esy Tasties"
-              ? esyOrder
-              : restaurantName === "Delight Restaurant"
-                ? delightOrder
-        : restaurantName === "Vibrant Food Mart"
-          ? vibrantOrder
-          : restaurantName === "Shop With Rahma"
-            ? rahmaOrder
-            : restaurantName === "Ibile Xpress (Go)"
-              ? ibileOrder
-              : restaurantName === "JJ Bistro"
-                ? jjBistroOrder
-                : restaurantName === "De Unique Kitchen"
-                  ? deUniqueOrder
-                  : restaurantName === "Daily Treat"
-                    ? dailyTreatOrder
-        : defaultOrder;
+  const tasteOfHomeOrder = ["Rice", "Pasta", "Noodles", "Yam", "Fast Food", "Extras", "Swallow", "Combos", "Other"];
+  const cakeByDavcecOrder = ["Rice Meals", "Proteins", "Other"];
+  const ojTreatsOrder = ["Extras", "Sauced Items", "Plantain Combos", "Chips", "Yam Dishes", "Soups & Proteins", "Rice Dishes", "Noodles & Pasta", "Shawarma", "Drinks", "Other"];
+  let preferredOrder = defaultOrder;
+  if (restaurantName === "Item7go") preferredOrder = item7goOrder;
+  else if (restaurantName === "Hollar Lee Express Meal") preferredOrder = hollarOrder;
+  else if (restaurantName === "Mide Pastries") preferredOrder = mideOrder;
+  else if (restaurantName === "Fola Juice & Parfait") preferredOrder = folaOrder;
+  else if (restaurantName === "Esy Tasties") preferredOrder = esyOrder;
+  else if (restaurantName === "Delight Restaurant") preferredOrder = delightOrder;
+  else if (restaurantName === "Vibrant Food Mart") preferredOrder = vibrantOrder;
+  else if (restaurantName === "Shop With Rahma") preferredOrder = rahmaOrder;
+  else if (restaurantName === "Ibile Xpress (Go)") preferredOrder = ibileOrder;
+  else if (restaurantName === "JJ Bistro") preferredOrder = jjBistroOrder;
+  else if (restaurantName === "De Unique Kitchen") preferredOrder = deUniqueOrder;
+  else if (restaurantName === "Daily Treat") preferredOrder = dailyTreatOrder;
+  else if (restaurantName === "Taste of Home Kitchen") preferredOrder = tasteOfHomeOrder;
+  else if (restaurantName === "CAKEBYDAVCEC KITCHEN") preferredOrder = cakeByDavcecOrder;
+  else if (restaurantName === "OJ Treats") preferredOrder = ojTreatsOrder;
   const entries = Object.entries(categoriesObj);
   entries.sort((a, b) => {
     const ai = preferredOrder.indexOf(a[0]);
@@ -2177,10 +2787,6 @@ router.get("/", async (req, res, next) => {
       where.name = { contains: String(q) };
     }
 
-    if (open === "true") {
-      where.open = true;
-    }
-
     where.type = type;
 
     const restaurants = await prisma.restaurant.findMany({
@@ -2188,12 +2794,15 @@ router.get("/", async (req, res, next) => {
       orderBy: { createdAt: "desc" },
     });
 
-    const normalizedRestaurants = restaurants.map((restaurant) => ({
-      ...restaurant,
-      type: restaurant.type ?? getBusinessTypeForName(restaurant.name),
-      currency: "NGN",
-      image: toPublicUrl(req, restaurant.image),
-    }));
+    const normalizedRestaurants = restaurants
+      .map((restaurant) => ({
+        ...restaurant,
+        open: getEffectiveOpenStatus(restaurant),
+        type: restaurant.type ?? getBusinessTypeForName(restaurant.name),
+        currency: "NGN",
+        image: toPublicUrl(req, restaurant.image),
+      }))
+      .filter((restaurant) => (open === "true" ? restaurant.open : true));
 
     return res.status(200).json({
       type,
@@ -2221,6 +2830,7 @@ router.get("/:id", async (req, res, next) => {
       restaurant: {
         ...restaurant,
         type: resolveBusinessType(restaurant),
+        open: getEffectiveOpenStatus(restaurant),
         currency: "NGN",
         image: toPublicUrl(req, restaurant.image),
       },
@@ -2246,7 +2856,6 @@ router.get("/:id/menu", async (req, res, next) => {
     const items = await prisma.menuItem.findMany({
       where: {
         restaurantId: restaurant.id,
-        price: { gt: 0 },
       },
       orderBy: { name: "asc" },
     });

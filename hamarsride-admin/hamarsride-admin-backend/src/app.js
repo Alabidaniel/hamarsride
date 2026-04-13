@@ -17,6 +17,7 @@ dotenv.config();
 initFirebase();
 
 const app = express();
+app.set("trust proxy", 1);
 
 const defaultOrigins = ["http://localhost:5174"];
 const allowedOrigins = (process.env.CORS_ORIGINS || defaultOrigins.join(","))
