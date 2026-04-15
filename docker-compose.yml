@@ -14,8 +14,8 @@ services:
 
   user-backend:
     build:
-      context: ./hamarsride-user/hamarsride-backend
-    container_name: hamarsride-user-backend
+      context: ./hamarsride-backend
+    container_name: hamarsride-backend
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -36,26 +36,6 @@ services:
       - ./serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro
       - user_uploads:/app/uploads
 
-  admin-backend:
-    build:
-      context: ./hamarsride-admin/hamarsride-admin-backend
-    container_name: hamarsride-admin-backend
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 5501
-      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD_URLENCODED:-Daniel2007}@mysql:3306/${MYSQL_DATABASE:-hamarsride}
-      CORS_ORIGINS: ${ADMIN_CORS_ORIGINS:-http://localhost:3001}
-      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/serviceAccountKey.json
-      ADMIN_UPLOADS_DIR: /app/uploads
-    depends_on:
-      - mysql
-    ports:
-      - "5501:5501"
-    volumes:
-      - ./serviceAccountKey.json:/run/secrets/serviceAccountKey.json:ro
-      - admin_uploads:/app/uploads
-
   user-frontend:
     build:
       context: ./hamarsride-user/HamarsRide
@@ -72,15 +52,14 @@ services:
     build:
       context: ./hamarsride-admin/hamarsride-admin-frontend
       args:
-        VITE_API_BASE_URL: ${ADMIN_API_BASE_URL:-http://localhost:5501}
+        VITE_API_BASE_URL: ${ADMIN_API_BASE_URL:-http://localhost:5000/api}
     container_name: hamarsride-admin-frontend
     restart: unless-stopped
     depends_on:
-      - admin-backend
+      - user-backend
     ports:
       - "3001:80"
 
 volumes:
   mysql_data:
   user_uploads:
-  admin_uploads:

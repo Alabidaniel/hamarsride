@@ -5,6 +5,6 @@
   "scripts": {
     "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File ./start-dev.ps1",
     "build": "npm --prefix hamarsride-admin-frontend run build",
-    "test": "npm --prefix hamarsride-admin-frontend run test && npm --prefix hamarsride-admin-backend run test"
+    "test": "npm --prefix hamarsride-admin-frontend run test && npm --prefix ../hamarsride-backend run test"
   }
 }

@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$backendDir = Join-Path $root 'hamarsride-backend'
+$backendDir = Join-Path $root '..\hamarsride-backend'
 $frontendDir = Join-Path $root 'HamarsRide'
 
 if (-not (Test-Path $backendDir)) {

@@ -31,9 +31,8 @@ npm install -g pm2
 
 mkdir -p \
   "$APP_ROOT/hamarsride-user-frontend" \
-  "$APP_ROOT/hamarsride-user-backend" \
+  "$APP_ROOT/hamarsride-backend" \
   "$APP_ROOT/hamarsride-admin-frontend" \
-  "$APP_ROOT/hamarsride-admin-backend" \
   "$APP_ROOT/secrets"
 
 chown -R "$APP_USER:$APP_USER" "$APP_ROOT"

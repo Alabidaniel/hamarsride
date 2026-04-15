@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">Esy Tasties</title>
+  <desc id="desc">Banner image for Esy Tasties menu on HamarsRide.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#111111" />
+      <stop offset="100%" stop-color="#000000" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)" />
+  <path d="M0 540 L420 140 L1180 0 L1200 0 L1200 700 L0 700 Z" fill="#000000" opacity="0.85" />
+  <circle cx="180" cy="140" r="120" fill="#ffffff" fill-opacity="0.1" />
+  <circle cx="980" cy="560" r="150" fill="#f59e0b" fill-opacity="0.18" />
+  <text x="110" y="180" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" fill="#ffffff">ESY</text>
+  <text x="110" y="245" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="800" fill="#f59e0b">TASTIES</text>
+  <text x="110" y="300" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#f3f4f6">Fresh. Tasty. Affordable.</text>
+  <text x="110" y="420" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" fill="#ffffff">Food Menu</text>
+  <text x="110" y="495" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#f59e0b">Snack • Small Chops • Saturday Special</text>
+  <text x="110" y="560" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#f3f4f6">Now available for delivery on HamarsRide</text>
+</svg>

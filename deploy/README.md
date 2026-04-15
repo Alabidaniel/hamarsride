@@ -5,7 +5,7 @@ This repo is wired for a single Ubuntu 22.04 VPS running:
 - User frontend on `hamarsride.com`
 - User API on `api.hamarsride.com`
 - Admin frontend on `admin.hamarsride.com`
-- Admin API on `admin-api.hamarsride.com`
+- One shared backend serving both user and admin APIs
 
 ## Exact DNS
 
@@ -15,7 +15,6 @@ Point these `A` records to `69.62.106.79`:
 - `www.hamarsride.com` -> `69.62.106.79`
 - `api.hamarsride.com` -> `69.62.106.79`
 - `admin.hamarsride.com` -> `69.62.106.79`
-- `admin-api.hamarsride.com` -> `69.62.106.79`
 
 ## VPS bootstrap
 
@@ -50,7 +49,6 @@ Required values:
 - `DOMAIN`
 - `API_DOMAIN`
 - `ADMIN_DOMAIN`
-- `ADMIN_API_DOMAIN`
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `LE_EMAIL`
@@ -60,9 +58,8 @@ Required values:
 The deploy script wires these paths under `/var/www`:
 
 - `/var/www/hamarsride-user-frontend`
-- `/var/www/hamarsride-user-backend`
+- `/var/www/hamarsride-backend`
 - `/var/www/hamarsride-admin-frontend`
-- `/var/www/hamarsride-admin-backend`
 
 ## Production deploy
 
@@ -74,8 +71,8 @@ bash deploy/vps/deploy-production.sh
 
 What it does:
 
-- Symlinks the four app roots into `/var/www`
-- Writes backend `.env` files
+- Symlinks the app roots into `/var/www`
+- Writes the backend `.env` file
 - Writes frontend `.env.production` files
 - Installs dependencies
 - Runs Prisma generate and migrate deploy
@@ -84,12 +81,13 @@ What it does:
 - Starts or reloads PM2
 - Requests SSL certificates with Certbot when `LE_EMAIL` is set
 
+The admin frontend is configured to use the same API base as the user app, so it talks to `api.hamarsride.com/api` instead of a separate admin API host.
+
 ## PM2
 
-The PM2 ecosystem file uses:
+The PM2 ecosystem file uses a single backend:
 
 - User backend on port `5000`
-- Admin backend on port `5001`
 
 ## Nginx
 
@@ -104,9 +102,9 @@ The provided [deploy/nginx.conf.example] template:
 
 ## Database
 
-Both backends use the same PostgreSQL instance through `DATABASE_URL`.
+The backend uses the same PostgreSQL instance through `DATABASE_URL`.
 
-The user backend owns the migration history, so `prisma migrate deploy` runs there during production deploy.
+The shared backend owns the migration history, so `prisma migrate deploy` runs there during production deploy.
 
 ## SSL renewal
 

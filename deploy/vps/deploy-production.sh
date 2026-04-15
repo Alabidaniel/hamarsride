@@ -17,30 +17,24 @@ DOMAIN="${DOMAIN:?Set DOMAIN in deploy/production.env}"
 WWW_DOMAIN="${WWW_DOMAIN:-www.$DOMAIN}"
 API_DOMAIN="${API_DOMAIN:?Set API_DOMAIN in deploy/production.env}"
 ADMIN_DOMAIN="${ADMIN_DOMAIN:?Set ADMIN_DOMAIN in deploy/production.env}"
-ADMIN_API_DOMAIN="${ADMIN_API_DOMAIN:?Set ADMIN_API_DOMAIN in deploy/production.env}"
 
 DATABASE_URL="${DATABASE_URL:-postgresql://${POSTGRES_USER:-hamarsride_app}:${POSTGRES_PASSWORD:-change_me_now}@${POSTGRES_HOST:-127.0.0.1}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-hamarsride}}"
 USER_BACKEND_PORT="${USER_BACKEND_PORT:-5000}"
-ADMIN_BACKEND_PORT="${ADMIN_BACKEND_PORT:-5001}"
 USER_API_BASE_URL="${USER_API_BASE_URL:-https://${API_DOMAIN}/api}"
-ADMIN_API_BASE_URL="${ADMIN_API_BASE_URL:-https://${ADMIN_API_DOMAIN}}"
+ADMIN_API_BASE_URL="${ADMIN_API_BASE_URL:-${USER_API_BASE_URL}}"
 JWT_SECRET="${JWT_SECRET:-change_me_now}"
 USER_CORS_ORIGINS="${USER_CORS_ORIGINS:-https://${DOMAIN},https://${WWW_DOMAIN},https://${ADMIN_DOMAIN}}"
-ADMIN_CORS_ORIGINS="${ADMIN_CORS_ORIGINS:-https://${ADMIN_DOMAIN}}"
-USER_UPLOADS_DIR="${USER_UPLOADS_DIR:-/var/www/hamarsride-user-backend/uploads}"
-ADMIN_UPLOADS_DIR="${ADMIN_UPLOADS_DIR:-/var/www/hamarsride-admin-backend/uploads}"
+USER_UPLOADS_DIR="${USER_UPLOADS_DIR:-/var/www/hamarsride-backend/uploads}"
 
 USER_FRONTEND_SRC="$SOURCE_ROOT/hamarsride-user/HamarsRide"
-USER_BACKEND_SRC="$SOURCE_ROOT/hamarsride-user/hamarsride-backend"
+USER_BACKEND_SRC="$SOURCE_ROOT/hamarsride-backend"
 ADMIN_FRONTEND_SRC="$SOURCE_ROOT/hamarsride-admin/hamarsride-admin-frontend"
-ADMIN_BACKEND_SRC="$SOURCE_ROOT/hamarsride-admin/hamarsride-admin-backend"
 
 mkdir -p "$APP_ROOT"
 
 ln -sfnT "$USER_FRONTEND_SRC" "$APP_ROOT/hamarsride-user-frontend"
-ln -sfnT "$USER_BACKEND_SRC" "$APP_ROOT/hamarsride-user-backend"
+ln -sfnT "$USER_BACKEND_SRC" "$APP_ROOT/hamarsride-backend"
 ln -sfnT "$ADMIN_FRONTEND_SRC" "$APP_ROOT/hamarsride-admin-frontend"
-ln -sfnT "$ADMIN_BACKEND_SRC" "$APP_ROOT/hamarsride-admin-backend"
 mkdir -p "$APP_ROOT/secrets"
 
 if [[ -f "$SOURCE_ROOT/serviceAccountKey.json" ]]; then
@@ -61,14 +55,6 @@ PAYMENT_ACCOUNT_NUMBER=${PAYMENT_ACCOUNT_NUMBER:-6115535987}
 USER_UPLOADS_DIR=${USER_UPLOADS_DIR}
 EOF
 
-cat >"$ADMIN_BACKEND_SRC/.env" <<EOF
-PORT=${ADMIN_BACKEND_PORT}
-DATABASE_URL="${DATABASE_URL}"
-GOOGLE_APPLICATION_CREDENTIALS=${APP_ROOT}/secrets/serviceAccountKey.json
-CORS_ORIGINS=${ADMIN_CORS_ORIGINS}
-ADMIN_UPLOADS_DIR=${ADMIN_UPLOADS_DIR}
-EOF
-
 cat >"$USER_FRONTEND_SRC/.env.production" <<EOF
 VITE_API_BASE_URL=${USER_API_BASE_URL}
 EOF
@@ -81,11 +67,6 @@ pushd "$USER_BACKEND_SRC" >/dev/null
 npm ci
 npx prisma generate
 npx prisma migrate deploy
-popd >/dev/null
-
-pushd "$ADMIN_BACKEND_SRC" >/dev/null
-npm ci
-npx prisma generate
 popd >/dev/null
 
 pushd "$USER_FRONTEND_SRC" >/dev/null
@@ -104,7 +85,6 @@ sed -i \
   -e "s/__WWW_DOMAIN__/${WWW_DOMAIN}/g" \
   -e "s/__API_DOMAIN__/${API_DOMAIN}/g" \
   -e "s/__ADMIN_DOMAIN__/${ADMIN_DOMAIN}/g" \
-  -e "s/__ADMIN_API_DOMAIN__/${ADMIN_API_DOMAIN}/g" \
   "$NGINX_TARGET"
 
 ln -sfn "$NGINX_TARGET" /etc/nginx/sites-enabled/hamarsride.conf
@@ -124,7 +104,6 @@ if [[ -n "${LE_EMAIL:-}" ]]; then
     -d "$WWW_DOMAIN" \
     -d "$API_DOMAIN" \
     -d "$ADMIN_DOMAIN" \
-    -d "$ADMIN_API_DOMAIN" \
     --redirect
 fi
 

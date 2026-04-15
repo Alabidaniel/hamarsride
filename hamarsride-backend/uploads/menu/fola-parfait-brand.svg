@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">Fola Juice and Parfait</title>
+  <desc id="desc">Branded cover image for Fola Juice and Parfait menu items.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#91b12d" />
+      <stop offset="100%" stop-color="#b8c73c" />
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff8ef" />
+      <stop offset="100%" stop-color="#ffffff" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="700" fill="url(#bg)" />
+  <circle cx="180" cy="120" r="90" fill="#ffffff" fill-opacity="0.12" />
+  <circle cx="1020" cy="580" r="120" fill="#ffffff" fill-opacity="0.1" />
+  <rect x="170" y="110" width="860" height="480" rx="36" fill="url(#card)" />
+  <rect x="250" y="170" width="700" height="78" rx="20" fill="#ff9a36" />
+  <text x="600" y="220" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700" fill="#ffffff">Fola Juice &amp; Parfait</text>
+  <text x="600" y="315" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" fill="#262626">Fresh parfaits, yogurt and fruit cups</text>
+  <text x="600" y="390" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" fill="#6b7280">Standard Parfait  |  Exotic Parfait  |  Yogurt</text>
+  <text x="600" y="450" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#6b7280">Made with fruit, granola and creamy yogurt</text>
+  <text x="600" y="525" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#ff9a36">Now available on HamarsRide</text>
+</svg>
