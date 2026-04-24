@@ -2,6 +2,7 @@ const express = require("express");
 const { z } = require("zod");
 const prisma = require("../prisma");
 const requireAuth = require("../middleware/authMiddleware");
+const { notifyAdmins } = require("../utils/adminAlerts");
 
 const router = express.Router();
 
@@ -50,7 +51,18 @@ router.get("/", async (req, res, next) => {
         ...(status ? { status } : {}),
       },
       orderBy: { createdAt: "desc" },
-      include: { items: true },
+      include: {
+        items: true,
+        receipts: {
+          select: { id: true },
+          take: 1,
+        },
+        payments: {
+          select: { status: true, createdAt: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
     });
 
     const mapped = orders.map((order) => ({
@@ -61,6 +73,8 @@ router.get("/", async (req, res, next) => {
       rejectionReason: order.rejectionReason,
       summary: order.items.map((item) => item.name).join(", "),
       createdAt: order.createdAt,
+      hasReceipt: order.receipts.length > 0,
+      latestPaymentStatus: order.payments[0]?.status || null,
     }));
 
     return res.status(200).json({ orders: mapped });
@@ -145,6 +159,17 @@ router.post("/", async (req, res, next) => {
       message: `Your order ${order.id} is pending and awaiting acceptance.`,
       type: "order",
     });
+
+    try {
+      await notifyAdmins({
+        prisma,
+        title: "New order placed",
+        message: `Order ${order.id} from ${user.name || user.email} is awaiting admin action.`,
+        type: "admin_order_submitted",
+      });
+    } catch (adminNotifyError) {
+      console.error("Failed to notify admins for new order:", adminNotifyError.message || adminNotifyError);
+    }
 
     return res.status(201).json({ order });
   } catch (error) {

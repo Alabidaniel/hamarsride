@@ -23,6 +23,7 @@ html,
 body,
 #root {
   min-height: 100%;
+  width: 100%;
 }
 
 body {
@@ -32,6 +33,7 @@ body {
   font-family: "DM Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 h1,
@@ -109,6 +111,13 @@ input,
 textarea,
 select {
   font-family: "DM Sans", sans-serif;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 table {
@@ -279,4 +288,27 @@ tbody tr th:last-child {
 .text-red-600,
 .text-red-700 {
   color: var(--hr-danger-text) !important;
+}
+
+@media (max-width: 767px) {
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(183, 149, 116, 0.25), transparent 35%),
+      radial-gradient(circle at bottom right, rgba(138, 104, 77, 0.18), transparent 38%),
+      #e8ddd0;
+  }
+
+  #root {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    background: var(--hr-bg);
+    box-shadow:
+      0 0 0 1px rgba(129, 98, 72, 0.2),
+      0 20px 48px rgba(72, 52, 33, 0.2);
+  }
+
+  body.hr-mobile-tabbar-enabled #root {
+    padding-bottom: calc(5.8rem + env(safe-area-inset-bottom));
+  }
 }

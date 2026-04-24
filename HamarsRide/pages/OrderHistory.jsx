@@ -10,7 +10,7 @@ export default function OrderHistory() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
   const [selectedReceipt, setSelectedReceipt] = useState(null);
-  const [loadingReceipt, setLoadingReceipt] = useState(false);
+  const [loadingReceiptId, setLoadingReceiptId] = useState("");
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -29,15 +29,25 @@ export default function OrderHistory() {
   }, []);
 
   const handleViewReceipt = async (orderId) => {
-    setLoadingReceipt(true);
+    setLoadingReceiptId(orderId);
     try {
       const response = await apiFetch(`/receipts/order/${orderId}`);
       setSelectedReceipt(response.receipt);
     } catch (err) {
       alert(err.message || "Failed to load receipt.");
     } finally {
-      setLoadingReceipt(false);
+      setLoadingReceiptId("");
     }
+  };
+
+  const getStatusClass = (status) => {
+    const value = String(status || "").toLowerCase();
+    if (value === "delivered") return "bg-green-100 text-green-700";
+    if (value === "rejected" || value === "cancelled") return "bg-red-100 text-red-700";
+    if (value === "accepted" || value === "processing" || value === "picked_up") {
+      return "bg-orange-100 text-orange-700";
+    }
+    return "bg-gray-100 text-gray-700";
   };
 
   return (
@@ -84,6 +94,8 @@ export default function OrderHistory() {
                 ) : null}
                 {history.map((item) => {
                   const displayStatus = item.rejectionReason ? "rejected" : item.status || "pending";
+                  const canViewReceipt =
+                    Boolean(item.hasReceipt) || item.latestPaymentStatus === "verified" || displayStatus === "delivered";
 
                   return (
                     <tr key={item.id} className="border-b border-gray-100">
@@ -96,13 +108,7 @@ export default function OrderHistory() {
                       <td className="py-4">
                         <div className="flex flex-col gap-1">
                           <span
-                            className={`text-xs px-3 py-1 rounded-full font-medium ${
-                              displayStatus === "delivered"
-                                ? "bg-green-100 text-green-700"
-                                : displayStatus === "rejected"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
+                            className={`text-xs px-3 py-1 rounded-full font-medium ${getStatusClass(displayStatus)}`}
                           >
                             {displayStatus}
                           </span>
@@ -114,13 +120,13 @@ export default function OrderHistory() {
                         </div>
                       </td>
                       <td className="py-4">
-                        {displayStatus === "delivered" ? (
+                        {canViewReceipt ? (
                           <button
                             onClick={() => handleViewReceipt(item.id)}
-                            disabled={loadingReceipt}
+                            disabled={loadingReceiptId === item.id}
                             className="text-xs px-3 py-1 rounded-full font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
                           >
-                            {loadingReceipt ? "Loading..." : "View Receipt"}
+                            {loadingReceiptId === item.id ? "Loading..." : "View Receipt"}
                           </button>
                         ) : (
                           <span className="text-xs text-gray-400">-</span>

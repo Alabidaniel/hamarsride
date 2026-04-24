@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const multer = require("multer");
 const prisma = require("../prisma");
 const requireAuth = require("../middleware/authMiddleware");
+const { notifyAdmins } = require("../utils/adminAlerts");
 
 const router = express.Router();
 
@@ -61,6 +62,81 @@ router.get("/instructions", (_req, res) => {
     accountName,
     accountNumber,
   });
+});
+
+router.get("/order/:orderId/latest", async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { firebaseUid: req.user.uid },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: {
+        orderId: req.params.orderId,
+        userId: user.id,
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        order: true,
+      },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found." });
+    }
+
+    const receipt = await prisma.receipt.findFirst({
+      where: {
+        orderId: payment.orderId,
+        userId: user.id,
+      },
+    });
+
+    return res.status(200).json({ payment, receipt: receipt || null });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/:id", async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { firebaseUid: req.user.uid },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id: req.params.id,
+        userId: user.id,
+      },
+      include: {
+        order: true,
+      },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found." });
+    }
+
+    const receipt = await prisma.receipt.findFirst({
+      where: {
+        orderId: payment.orderId,
+        userId: user.id,
+      },
+    });
+
+    return res.status(200).json({ payment, receipt: receipt || null });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 router.post("/", upload.single("receipt"), async (req, res, next) => {
@@ -162,20 +238,18 @@ router.post("/", upload.single("receipt"), async (req, res, next) => {
       },
     });
 
-    const admins = await prisma.user.findMany({
-      where: { role: "admin" },
-      select: { id: true },
-    });
-
-    if (admins.length > 0) {
-      await prisma.notification.createMany({
-        data: admins.map((admin) => ({
-          userId: admin.id,
-          title: "New payment submitted",
-          message: `${user.email} submitted payment for order ${order.id}.`,
-          type: "admin_payment_submitted",
-        })),
+    try {
+      await notifyAdmins({
+        prisma,
+        title: "New payment submitted",
+        message: `${user.name || user.email} submitted payment for order ${order.id}.`,
+        type: "admin_payment_submitted",
       });
+    } catch (adminNotifyError) {
+      console.error(
+        "Failed to notify admins for payment submission:",
+        adminNotifyError.message || adminNotifyError
+      );
     }
 
     return res.status(201).json({ payment, order });

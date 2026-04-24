@@ -42,7 +42,10 @@ const apiFetch = async (path, options = {}) => {
     const payload = await response.json().catch(() => ({}));
     console.error("API error:", response.status, response.statusText, payload);
     const message = payload.error || payload.message || "Request failed";
-    throw new Error(message);
+    const error = new Error(message);
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
   }
 
   if (response.status === 204) return null;

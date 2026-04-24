@@ -28,6 +28,12 @@ const updatePaymentSchema = z.object({
   status: z.enum(["verified", "rejected"]),
 });
 
+const generateReceiptNumber = () => {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `RCP-${timestamp}-${random}`;
+};
+
 const updateRestaurantSchema = z.object({
   name: z.string().min(1).optional(),
   type: z.enum(["restaurant", "shop"]).optional(),
@@ -235,6 +241,15 @@ router.get("/payments", async (req, res, next) => {
 router.patch("/payments/:id/status", async (req, res, next) => {
   try {
     const { status } = updatePaymentSchema.parse(req.body);
+    const admin = await prisma.user.findUnique({
+      where: { firebaseUid: req.user.uid },
+      select: { id: true },
+    });
+
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found." });
+    }
+
     const payment = await prisma.payment.findUnique({
       where: { id: req.params.id },
       include: { order: true, user: true },
@@ -249,6 +264,44 @@ router.patch("/payments/:id/status", async (req, res, next) => {
       data: { status },
     });
 
+    let receipt = null;
+    if (status === "verified") {
+      const existingReceipt = await prisma.receipt.findFirst({
+        where: { orderId: payment.orderId },
+      });
+
+      if (existingReceipt) {
+        receipt = existingReceipt;
+      } else {
+        const orderWithItems = await prisma.order.findUnique({
+          where: { id: payment.orderId },
+          include: { items: true },
+        });
+
+        if (orderWithItems) {
+          receipt = await prisma.receipt.create({
+            data: {
+              orderId: orderWithItems.id,
+              userId: orderWithItems.userId,
+              receiptNumber: generateReceiptNumber(),
+              items: orderWithItems.items.map((item) => ({
+                name: item.name,
+                qty: item.qty,
+                price: item.price,
+                total: item.price * item.qty,
+              })),
+              subtotal: orderWithItems.subtotal,
+              deliveryFee: orderWithItems.deliveryFee,
+              total: orderWithItems.total,
+              address: orderWithItems.address,
+              instruction: orderWithItems.instruction,
+              generatedBy: admin.id,
+            },
+          });
+        }
+      }
+    }
+
     await prisma.notification.create({
       data: {
         userId: payment.userId,
@@ -261,7 +314,18 @@ router.patch("/payments/:id/status", async (req, res, next) => {
       },
     });
 
-    return res.status(200).json({ payment: updated });
+    if (status === "verified" && receipt) {
+      await prisma.notification.create({
+        data: {
+          userId: payment.userId,
+          title: "Receipt generated",
+          message: `Receipt ${receipt.receiptNumber} is ready for order ${payment.orderId}.`,
+          type: "receipt",
+        },
+      });
+    }
+
+    return res.status(200).json({ payment: updated, receipt });
   } catch (error) {
     return next(error);
   }

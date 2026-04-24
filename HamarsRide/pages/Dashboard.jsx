@@ -11,6 +11,7 @@ import { API_BASE_URL } from "../src/config";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [heroSearch, setHeroSearch] = useState("");
   const [activeOrder, setActiveOrder] = useState(null);
   const [isLoadingActive, setIsLoadingActive] = useState(true);
   const [activeError, setActiveError] = useState("");
@@ -20,13 +21,7 @@ export default function Dashboard() {
   const [featuredShops, setFeaturedShops] = useState([]);
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
   const [featuredError, setFeaturedError] = useState("");
-  const categories = [
-    "Amala",
-    "Pizza",
-    "Fried Rice",
-    "Chicken Rquie",
-    "Chicken Republic",
-  ];
+  const categories = ["Rice", "Pizza", "Chicken", "Burger", "Shawarma"];
   const getInitials = (name = "") =>
     name
       .split(" ")
@@ -62,11 +57,11 @@ export default function Dashboard() {
     ));
 
   const actions = [
-    { icon: Package, label: "New Delivery", subtitle: "Start a fresh order", path: "/restaurants" },
+    { icon: Package, label: "Order Food", subtitle: "Start a fresh food order", path: "/restaurants" },
     { icon: Store, label: "Browse Shops", subtitle: "Get groceries and essentials", path: "/shops" },
     { icon: FileText, label: "Order History", subtitle: "View past requests", path: "/order-history" },
-    { icon: Clock, label: "Saved Addresses", subtitle: "Manage locations", path: "/saved-addresses" },
-    { icon: MapPin, label: "Delivered", subtitle: "Track completed orders", path: "/delivered-orders" },
+    { icon: Clock, label: "Saved Addresses", subtitle: "Manage delivery locations", path: "/saved-addresses" },
+    { icon: MapPin, label: "Delivered", subtitle: "See completed deliveries", path: "/delivered-orders" },
   ];
 
   useEffect(() => {
@@ -241,9 +236,8 @@ export default function Dashboard() {
             <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 shadow-[0_20px_60px_rgba(72,52,33,0.08)]">
               <div className="flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold leading-snug">
-                  Order food, groceries, and more <br />
-                  Get it Delivered to your location<br />
-                  fast and stress-free
+                  Ordering made easy <br />
+                  Pick your meal, checkout, and track delivery
                 </h1>
 
                 <div className="mt-4 sm:mt-6 flex flex-wrap gap-3">
@@ -261,9 +255,23 @@ export default function Dashboard() {
                   </button>
                 </div>
 
-                <div className="mt-4 sm:mt-6 bg-[#faf5ee] border border-[#e2d3c1] px-4 py-2 rounded-full w-full sm:w-[420px] flex items-center">
+                <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3 sm:max-w-[520px]">
+                  <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] px-3 py-2">1. Browse restaurants</div>
+                  <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] px-3 py-2">2. Add to cart</div>
+                  <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] px-3 py-2">3. Checkout</div>
+                </div>
+
+                <div className="mt-4 sm:mt-5 bg-[#faf5ee] border border-[#e2d3c1] px-4 py-2 rounded-full w-full sm:w-[420px] flex items-center">
                   <Search size={16} />
                   <input
+                    value={heroSearch}
+                    onChange={(event) => setHeroSearch(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        const q = heroSearch.trim();
+                        navigate(q ? `/restaurants?q=${encodeURIComponent(q)}` : "/restaurants");
+                      }
+                    }}
                     placeholder="Search restaurants, shops, meals, or groceries"
                     className="bg-transparent outline-none ml-2 w-full text-sm"
                   />
@@ -281,6 +289,7 @@ export default function Dashboard() {
               {categories.map((item) => (
                 <button
                   key={item}
+                  onClick={() => navigate(`/restaurants?q=${encodeURIComponent(item)}`)}
                   className="px-4 py-2 border border-[#d8c8b5] text-[#8b6748] bg-[#faf5ee] rounded-full text-sm"
                 >
                   {item}

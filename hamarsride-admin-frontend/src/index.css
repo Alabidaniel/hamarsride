@@ -17,3 +17,26 @@ body {
   background: #f3f4f6;
   color: #111827;
 }
+
+@media (max-width: 767px) {
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(251, 146, 60, 0.18), transparent 35%),
+      radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.16), transparent 36%),
+      #e5e7eb;
+  }
+
+  #root {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    background: #f3f4f6;
+    box-shadow:
+      0 0 0 1px rgba(17, 24, 39, 0.12),
+      0 18px 44px rgba(17, 24, 39, 0.18);
+  }
+
+  body.admin-mobile-tabbar-enabled #root {
+    padding-bottom: calc(5.8rem + env(safe-area-inset-bottom));
+  }
+}

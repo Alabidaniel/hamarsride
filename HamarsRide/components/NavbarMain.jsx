@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Bell, Search, ShoppingCart, House, Store } from "lucide-react";
 import Logo from "../src/assets/logo.png";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../src/services/apiClient";
 import { resolvePhotoUrl } from "../src/utils/photoUrl";
 
 export default function NavbarMain() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState(() => {
     const localProfile = localStorage.getItem("userProfile");
     if (!localProfile) {
@@ -19,6 +20,86 @@ export default function NavbarMain() {
     }
   });
   const [unreadCount, setUnreadCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
+
+  const navItems = useMemo(
+    () => [
+      {
+        key: "home",
+        label: "Home",
+        path: "/dashboard",
+        icon: House,
+        active:
+          location.pathname === "/dashboard" ||
+          location.pathname === "/",
+      },
+      {
+        key: "restaurants",
+        label: "Order Food",
+        path: "/restaurants",
+        icon: Store,
+        active:
+          location.pathname.startsWith("/restaurants") ||
+          location.pathname.startsWith("/shops"),
+      },
+      {
+        key: "cart",
+        label: "Cart",
+        path: "/cart",
+        icon: ShoppingCart,
+        active:
+          location.pathname.startsWith("/cart") ||
+          location.pathname.startsWith("/Checkout") ||
+          location.pathname.startsWith("/checkout") ||
+          location.pathname.startsWith("/payment"),
+      },
+    ],
+    [location.pathname]
+  );
+
+  const mobileTabs = useMemo(
+    () => [
+      {
+        key: "home",
+        label: "Home",
+        icon: House,
+        path: "/dashboard",
+        active: location.pathname === "/dashboard" || location.pathname === "/",
+        badge: null,
+      },
+      {
+        key: "order",
+        label: "Order",
+        icon: Store,
+        path: "/restaurants",
+        active:
+          location.pathname.startsWith("/restaurants") ||
+          location.pathname.startsWith("/shops"),
+        badge: null,
+      },
+      {
+        key: "cart",
+        label: "Cart",
+        icon: ShoppingCart,
+        path: "/cart",
+        active:
+          location.pathname.startsWith("/cart") ||
+          location.pathname.startsWith("/Checkout") ||
+          location.pathname.startsWith("/checkout") ||
+          location.pathname.startsWith("/payment"),
+        badge: cartCount > 0 ? (cartCount > 99 ? "99+" : String(cartCount)) : null,
+      },
+      {
+        key: "alerts",
+        label: "Alerts",
+        icon: Bell,
+        path: "/notifications",
+        active: location.pathname.startsWith("/notifications"),
+        badge: unreadCount > 0 ? (unreadCount > 99 ? "99+" : String(unreadCount)) : null,
+      },
+    ],
+    [cartCount, location.pathname, unreadCount]
+  );
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -35,31 +116,54 @@ export default function NavbarMain() {
   }, []);
 
   useEffect(() => {
-    const loadUnreadCount = async () => {
+    document.body.classList.add("hr-mobile-tabbar-enabled");
+    return () => {
+      document.body.classList.remove("hr-mobile-tabbar-enabled");
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadCounts = async () => {
       try {
-        const payload = await apiFetch("/notifications");
-        setUnreadCount(payload.unreadCount || 0);
+        const [notificationsPayload, cartPayload] = await Promise.all([
+          apiFetch("/notifications"),
+          apiFetch("/cart"),
+        ]);
+
+        setUnreadCount(notificationsPayload.unreadCount || 0);
+        const nextCartCount = (cartPayload.items || []).reduce(
+          (acc, item) => acc + (item.quantity || 0),
+          0
+        );
+        setCartCount(nextCartCount);
       } catch (_err) {
         setUnreadCount(0);
+        setCartCount(0);
       }
     };
 
-    loadUnreadCount();
+    loadCounts();
 
-    const timer = setInterval(loadUnreadCount, 30000);
+    const timer = setInterval(loadCounts, 30000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="border-b border-[#dccbb7] bg-[#f8f1e7] px-4 py-3 shadow-sm sm:px-6 sm:py-4">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[1.75rem] border border-[#e2d3c1] bg-[#fffdf9] px-4 py-3 shadow-[0_12px_30px_rgba(73,53,34,0.05)] sm:px-6">
-        <div className="flex items-center gap-2 sm:gap-3 font-bold text-lg">
+    <>
+    <div className="sticky top-0 z-30 border-b border-[#dccbb7] bg-[#f8f1e7] px-3 py-2 shadow-sm sm:px-6 sm:py-4 md:static md:z-auto">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 rounded-[1.4rem] border border-[#e2d3c1] bg-[#fffdf9] px-3 py-2 shadow-[0_12px_30px_rgba(73,53,34,0.05)] sm:gap-3 sm:rounded-[1.75rem] sm:px-6 sm:py-3">
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-2 font-bold text-lg"
+          aria-label="Go to dashboard"
+        >
           <img
             src={Logo}
             alt="Hamars Ride Logo"
-            className="h-12 w-12 object-contain sm:h-16 sm:w-16 md:h-18 md:w-18"
+            className="h-10 w-10 object-contain sm:h-16 sm:w-16 md:h-18 md:w-18"
           />
-        </div>
+        </button>
 
         <div className="hidden w-full max-w-xs items-center rounded-full border border-[#e7dbce] bg-[#faf5ee] px-3 py-2 text-[#5d4939] sm:flex md:max-w-md lg:max-w-lg">
           <Search size={18} className="text-[#8b735d]" />
@@ -70,34 +174,32 @@ export default function NavbarMain() {
           />
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="text-[#6d5847] transition hover:text-[#8b6748]"
-            aria-label="Go to dashboard"
-          >
-            <House className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-
-          <button
-            onClick={() => navigate("/restaurants")}
-            className="text-[#6d5847] transition hover:text-[#8b6748]"
-            aria-label="Browse restaurants and shops"
-          >
-            <Store className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-
-          <button
-            onClick={() => navigate("/cart")}
-            className="text-[#6d5847] transition hover:text-[#8b6748]"
-            aria-label="Open cart"
-          >
-            <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          {navItems.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => navigate(item.path)}
+              className={`relative hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition md:inline-flex ${
+                item.active
+                  ? "border-[#8a684d] bg-[#f1e7db] text-[#8b6748]"
+                  : "border-[#e7dbce] bg-[#faf5ee] text-[#6d5847] hover:border-[#c9b5a2]"
+              }`}
+              aria-label={item.label}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.label}</span>
+              {item.key === "cart" && cartCount > 0 ? (
+                <span className="grid h-5 min-w-[20px] place-items-center rounded-full bg-[#8a684d] px-1 text-[10px] font-semibold text-[#fffaf4]">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              ) : null}
+            </button>
+          ))}
 
           <button
             onClick={() => navigate("/notifications")}
-            className="relative text-[#6d5847] transition hover:text-[#8b6748]"
+            className="relative rounded-full p-2 text-[#6d5847] transition hover:bg-[#f5ece2] hover:text-[#8b6748]"
             aria-label="Open notifications"
           >
             <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -108,7 +210,7 @@ export default function NavbarMain() {
             ) : null}
           </button>
 
-          <p className="hidden text-sm text-[#5d4939] md:block">
+          <p className="hidden text-sm text-[#5d4939] xl:block">
             {profile?.name ? `Welcome, ${profile.name.trim().split(/\s+/)[0]}!` : "Welcome!"}
           </p>
 
@@ -131,5 +233,30 @@ export default function NavbarMain() {
         </div>
       </div>
     </div>
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] md:hidden">
+      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-[#ddccb8] bg-[#fffdf9]/96 p-1.5 shadow-[0_-6px_30px_rgba(73,53,34,0.14)] backdrop-blur">
+        {mobileTabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => navigate(tab.path)}
+            className={`relative flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition ${
+              tab.active
+                ? "bg-[#8a684d] text-[#fffaf4]"
+                : "text-[#6d5847] hover:bg-[#f4ebdf]"
+            }`}
+          >
+            <tab.icon className="h-4 w-4" />
+            <span className="mt-1">{tab.label}</span>
+            {tab.badge ? (
+              <span className="absolute right-1.5 top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#b98b61] px-1 text-[9px] font-semibold text-white">
+                {tab.badge}
+              </span>
+            ) : null}
+          </button>
+        ))}
+      </div>
+    </nav>
+    </>
   );
 }

@@ -60,6 +60,8 @@ const statusNotifications = {
   },
 };
 
+const normalizeName = (value = "") => value.trim().toLowerCase();
+
 router.use(requireAuth);
 router.use(requireRole(["admin"]));
 
@@ -75,7 +77,24 @@ router.get("/", async (req, res, next) => {
           ...(userId ? { userId } : {}),
         },
         orderBy: { createdAt: "desc" },
-        include: { items: true, user: true },
+        include: {
+          items: true,
+          user: {
+            include: {
+              addresses: {
+                orderBy: { isDefault: "desc" },
+              },
+            },
+          },
+          payments: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+          receipts: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+        },
         skip,
         take: pageSize,
       }),
@@ -87,8 +106,82 @@ router.get("/", async (req, res, next) => {
       }),
     ]);
 
+    const uniqueItemNames = [
+      ...new Set(
+        orders
+          .flatMap((order) => order.items.map((item) => item.name))
+          .filter(Boolean)
+          .map((name) => String(name).trim())
+      ),
+    ];
+
+    let menuItems = [];
+    if (uniqueItemNames.length > 0) {
+      // Pull potential source businesses so admins can see where items likely came from.
+      const rawMenuItems = await prisma.menuItem.findMany({
+        where: {
+          name: {
+            in: uniqueItemNames,
+          },
+        },
+        select: {
+          name: true,
+          restaurant: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+            },
+          },
+        },
+      });
+
+      menuItems = rawMenuItems.map((entry) => ({
+        ...entry,
+        normalizedName: normalizeName(entry.name),
+      }));
+    }
+
+    const businessByItemName = menuItems.reduce((acc, item) => {
+      if (!acc[item.normalizedName]) {
+        acc[item.normalizedName] = [];
+      }
+
+      const alreadyExists = acc[item.normalizedName].some(
+        (business) => business.id === item.restaurant.id
+      );
+      if (!alreadyExists) {
+        acc[item.normalizedName].push(item.restaurant);
+      }
+
+      return acc;
+    }, {});
+
+    const enrichedOrders = orders.map((order) => {
+      const businessesMap = new Map();
+      const detailedItems = order.items.map((item) => {
+        const possibleBusinesses = businessByItemName[normalizeName(item.name)] || [];
+        possibleBusinesses.forEach((business) => {
+          businessesMap.set(business.id, business);
+        });
+
+        return {
+          ...item,
+          possibleBusinesses,
+        };
+      });
+
+      return {
+        ...order,
+        items: detailedItems,
+        businesses: Array.from(businessesMap.values()),
+        latestPayment: order.payments[0] || null,
+        latestReceipt: order.receipts[0] || null,
+      };
+    });
+
     return res.status(200).json({
-      orders,
+      orders: enrichedOrders,
       page,
       pageSize,
       total,

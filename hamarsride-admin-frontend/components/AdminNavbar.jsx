@@ -56,6 +56,11 @@ export default function AdminNavbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [openNotice, setOpenNotice] = useState(false);
 
+  const isLinkActive = useCallback(
+    (to) => (to === "/" ? location.pathname === "/" : location.pathname.startsWith(to)),
+    [location.pathname]
+  );
+
   const loadNotifications = useCallback(async () => {
     try {
       const payload = await apiFetch("/notifications");
@@ -77,6 +82,13 @@ export default function AdminNavbar() {
       clearInterval(timer);
     };
   }, [loadNotifications]);
+
+  useEffect(() => {
+    document.body.classList.add("admin-mobile-tabbar-enabled");
+    return () => {
+      document.body.classList.remove("admin-mobile-tabbar-enabled");
+    };
+  }, []);
 
   const initials = useMemo(() => {
     if (!profile?.name) return "A";
@@ -206,9 +218,9 @@ export default function AdminNavbar() {
         </div>
       </div>
 
-      <nav className="mt-4 flex flex-wrap gap-2">
+      <nav className="mt-4 hidden flex-wrap gap-2 md:flex">
         {links.map((link) => {
-          const active = location.pathname === link.to;
+          const active = isLinkActive(link.to);
           const Icon = link.icon;
           return (
             <Link
@@ -225,6 +237,33 @@ export default function AdminNavbar() {
             </Link>
           );
         })}
+      </nav>
+      <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] md:hidden">
+        <div className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white/96 p-1.5 shadow-[0_-6px_30px_rgba(17,24,39,0.18)] backdrop-blur">
+          {links.map((link) => {
+            const active = isLinkActive(link.to);
+            const Icon = link.icon;
+            return (
+              <Link
+                key={`mobile-${link.to}`}
+                to={link.to}
+                className={`relative inline-flex min-w-[64px] flex-col items-center justify-center rounded-xl px-2 py-2 text-[10px] transition ${
+                  active
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-700 hover:bg-orange-100 hover:text-orange-700"
+                }`}
+              >
+                <Icon size={14} />
+                <span className="mt-1 whitespace-nowrap">{link.label}</span>
+                {link.to === "/orders" && unreadCount > 0 ? (
+                  <span className="absolute right-1 top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-orange-600 px-1 text-[9px] font-semibold text-white">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
     </header>
   );

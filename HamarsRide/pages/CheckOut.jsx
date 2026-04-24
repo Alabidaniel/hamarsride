@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import NavbarMain from "../components/NavbarMain";
+import Footer from "../components/Footer";
 import { apiFetch } from "../src/services/apiClient";
+
+const deliveryFee = 1000;
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -13,8 +17,6 @@ const Checkout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
-  const deliveryFee = 1000;
 
   const loadCheckout = async () => {
     try {
@@ -58,6 +60,7 @@ const Checkout = () => {
     const selectedAddressData = addresses.find((address) => address.id === selectedAddress);
     localStorage.setItem("pendingOrderInstruction", orderInstruction);
     setSuccessMessage("");
+    setError("");
 
     if (!selectedAddressData) {
       setError("Please select a delivery address.");
@@ -84,161 +87,167 @@ const Checkout = () => {
 
     localStorage.setItem("pendingOrderDraft", JSON.stringify(paymentDraft));
 
-    // Navigate to payment page with order details (order will be created after payment)
     navigate("/payment", {
       state: paymentDraft,
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8 font-sans text-gray-800">
-      {/* Navbar / Progress */}
-      <nav className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
-        <div className="text-xl sm:text-2xl font-bold text-orange-600">HAMARS RIDE</div>
-        <div className="flex items-center gap-2 sm:gap-4 text-gray-600 overflow-x-auto">
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center">1</div>
-            <span className="ml-2 hidden md:inline">Cart</span>
+    <div className="min-h-screen bg-[#f6f0e7] text-[#2f241b] flex flex-col">
+      <NavbarMain />
+
+      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1">
+        <section className="rounded-[1.5rem] border border-[#ddccb8] bg-[#fffdf9] px-5 py-6 shadow-sm sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#8e6b4c]">Step 3 of 3</p>
+          <h1 className="mt-3 text-2xl font-semibold sm:text-3xl">Checkout details</h1>
+          <p className="mt-2 text-sm text-[#6f5a48]">
+            Pick where to deliver, add optional notes, then continue to payment.
+          </p>
+
+          <div className="mt-5 grid gap-2 text-sm sm:grid-cols-3">
+            <div className="rounded-xl border border-[#e5d6c3] bg-[#f6efe6] px-3 py-2">1. Pick items</div>
+            <div className="rounded-xl border border-[#e5d6c3] bg-[#f6efe6] px-3 py-2">2. Review cart</div>
+            <div className="rounded-xl border border-[#8a684d] bg-[#f1e7db] px-3 py-2 font-medium text-[#7d5b43]">
+              3. Checkout & pay
+            </div>
           </div>
-          <div className="w-8 sm:w-12 h-1 bg-gray-300"></div>
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center">2</div>
-            <span className="ml-2 hidden md:inline">Checkout</span>
+        </section>
+
+        {error ? (
+          <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
           </div>
-          <div className="w-8 sm:w-12 h-1 bg-gray-300"></div>
-          <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center">3</div>
-            <span className="ml-2 hidden md:inline">Confirmation</span>
+        ) : null}
+
+        {successMessage ? (
+          <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {successMessage}
           </div>
-        </div>
-      </nav>
+        ) : null}
 
-      {/* Page Title */}
-      <h1 className="text-3xl font-semibold mb-6">Checkout</h1>
-
-      {error ? (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
-
-      {successMessage ? (
-        <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {successMessage}
-        </div>
-      ) : null}
-
-      {isLoading ? (
-        <div className="bg-white rounded-xl p-6 shadow-sm text-gray-500">
-          Loading checkout...
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Delivery Address Section */}
-            <section className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {addresses.map((address) => (
-                  <div
-                    key={address.id}
-                    onClick={() => setSelectedAddress(address.id)}
-                    className={`border rounded-lg p-4 cursor-pointer transition ${
-                      selectedAddress === address.id
-                        ? "border-orange-600 bg-orange-50"
-                        : "border-gray-300 bg-white"
-                    }`}
+        {isLoading ? (
+          <div className="mt-5 bg-[#fffdf9] rounded-xl p-6 shadow-sm text-[#7d6a59]">Loading checkout...</div>
+        ) : (
+          <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <section className="bg-[#fffdf9] rounded-xl p-5 sm:p-6 shadow-sm border border-[#e2d3c1]">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-xl font-semibold">Delivery address</h2>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/add-address")}
+                    className="rounded-full border border-[#ddccb8] bg-[#faf5ee] px-3 py-1.5 text-xs font-medium text-[#745e4b]"
                   >
-                    <p className="font-semibold">{address.label}</p>
-                    <p className="text-gray-600 text-sm">{address.details}</p>
+                    Add new
+                  </button>
+                </div>
+
+                {addresses.length === 0 ? (
+                  <div className="mt-4 rounded-xl border border-dashed border-[#d5c2ad] bg-[#faf5ee] p-4 text-sm text-[#6f5a48]">
+                    No saved address found. Add an address to continue.
                   </div>
-                ))}
-                <div
-                  onClick={() => navigate("/add-address")}
-                  className="border border-dashed border-gray-400 rounded-lg p-4 flex items-center justify-center cursor-pointer hover:border-orange-600 transition"
-                >
-                  + Add New Address
-                </div>
-              </div>
-            </section>
-
-            {/* Payment Method Section */}
-            <section className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-              <button
-                onClick={continueToPayment}
-                className="w-full text-left border border-orange-300 bg-orange-50 rounded-lg p-4 hover:border-orange-500 hover:bg-orange-100 transition"
-              >
-                <p className="font-semibold text-orange-700">Bank Transfer</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  Pay directly to the admin account and continue from the payment page.
-                </p>
-              </button>
-            </section>
-
-            <section className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Order Instructions</h2>
-              <p className="text-sm text-gray-500 mb-3">
-                Add any special request for the rider or restaurant.
-              </p>
-              <textarea
-                value={orderInstruction}
-                onChange={(event) => setOrderInstruction(event.target.value)}
-                maxLength={300}
-                placeholder="Example: No onions, call me at gate, deliver to reception."
-                className="w-full min-h-[120px] border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                {orderInstruction.length}/300 characters
-              </p>
-            </section>
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            <section className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-              <div className="space-y-3">
-                {orderItems.length === 0 ? (
-                  <p className="text-sm text-gray-500">Your cart is empty.</p>
                 ) : (
-                  orderItems.map((item, idx) => (
-                    <div key={idx} className="flex justify-between">
-                      <span>{item.name} x{item.qty}</span>
-                      <span>₦{(item.price * item.qty).toLocaleString()}</span>
-                    </div>
-                  ))
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {addresses.map((address) => (
+                      <label
+                        key={address.id}
+                        className={`border rounded-lg p-4 cursor-pointer transition flex items-start gap-3 ${
+                          selectedAddress === address.id
+                            ? "border-[#8a684d] bg-[#f1e7db]"
+                            : "border-[#e2d3c1] bg-white"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          className="mt-1 accent-orange-600"
+                          checked={selectedAddress === address.id}
+                          onChange={() => setSelectedAddress(address.id)}
+                        />
+                        <div className="min-w-0">
+                          <p className="break-words font-semibold">{address.label}</p>
+                          <p className="break-words text-[#6f5a48] text-sm">{address.details}</p>
+                          {address.isDefault ? (
+                            <span className="mt-2 inline-flex rounded-full bg-[#e8dacc] px-2 py-1 text-[11px] font-medium text-[#73553f]">
+                              Default
+                            </span>
+                          ) : null}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 )}
-              </div>
-              <div className="border-t border-gray-200 mt-4 pt-4 space-y-2">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
-                  <span>₦{subtotal.toLocaleString()}</span>
+              </section>
+
+              <section className="bg-[#fffdf9] rounded-xl p-5 sm:p-6 shadow-sm border border-[#e2d3c1]">
+                <h2 className="text-xl font-semibold">Delivery instructions (optional)</h2>
+                <p className="text-sm text-[#6f5a48] mt-2">
+                  Add notes like gate number, landmark, or food preference.
+                </p>
+                <textarea
+                  value={orderInstruction}
+                  onChange={(event) => setOrderInstruction(event.target.value)}
+                  maxLength={300}
+                  placeholder="Example: Call me at the gate. No onions please."
+                  className="mt-3 w-full min-h-[120px] border border-[#dbcab6] bg-[#faf5ee] rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                />
+                <p className="text-xs text-[#7d6a59] mt-2">{orderInstruction.length}/300 characters</p>
+              </section>
+            </div>
+
+            <aside className="space-y-6">
+              <section className="bg-[#fffdf9] rounded-xl p-5 sm:p-6 shadow-sm border border-[#e2d3c1]">
+                <h2 className="text-xl font-semibold">Order summary</h2>
+                <div className="mt-4 space-y-2 text-sm">
+                  {orderItems.length === 0 ? (
+                    <p className="text-[#6f5a48]">Your cart is empty.</p>
+                  ) : (
+                    orderItems.map((item, idx) => (
+                      <div key={`${item.name}-${idx}`} className="flex items-start justify-between gap-3">
+                        <span className="min-w-0 break-words text-[#4c3b2f]">
+                          {item.name} x{item.qty}
+                        </span>
+                        <span className="whitespace-nowrap">N{(item.price * item.qty).toLocaleString()}</span>
+                      </div>
+                    ))
+                  )}
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Delivery Fee</span>
-                  <span>₦{(orderItems.length ? deliveryFee : 0).toLocaleString()}</span>
+
+                <div className="border-t border-[#e5d7c5] mt-4 pt-4 space-y-2 text-sm">
+                  <div className="flex justify-between text-[#6f5a48]">
+                    <span>Subtotal</span>
+                    <span>N{subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-[#6f5a48]">
+                    <span>Delivery fee</span>
+                    <span>N{(orderItems.length ? deliveryFee : 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg mt-2">
+                    <span>Total</span>
+                    <span>N{total.toLocaleString()}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between font-bold text-lg mt-2">
-                  <span>Total</span>
-                  <span>₦{total.toLocaleString()}</span>
-                </div>
-              </div>
-              <button
-                onClick={continueToPayment}
-                className="w-full mt-6 bg-orange-600 text-white py-3 rounded-lg font-semibold hover:bg-orange-700 transition disabled:opacity-60"
-                disabled={orderItems.length === 0}
-              >
-                Continue to Payment
-              </button>
-              <p className="text-gray-500 text-sm mt-2 text-center">
-                Your payment and data are securely handled.
-              </p>
-            </section>
+
+                <button
+                  onClick={continueToPayment}
+                  className="w-full mt-6 bg-[#8a684d] text-[#fffaf4] py-3 rounded-lg font-semibold hover:bg-[#76563f] transition disabled:opacity-60"
+                  disabled={orderItems.length === 0 || addresses.length === 0}
+                >
+                  Continue to Payment
+                </button>
+
+                <button
+                  onClick={() => navigate("/cart")}
+                  className="w-full mt-2 border border-[#ddccb8] bg-[#faf5ee] text-[#6f5a48] py-3 rounded-lg transition hover:border-[#c1ab95]"
+                >
+                  Back to Cart
+                </button>
+              </section>
+            </aside>
           </div>
-        </div>
-      )}
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 };
