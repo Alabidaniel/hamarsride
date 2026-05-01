@@ -8,6 +8,9 @@ import {
   Users,
   CreditCard,
   ListChecks,
+  UtensilsCrossed,
+  Image as ImageIcon,
+  ChartLine,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { apiFetch } from "../src/services/apiClient";
@@ -15,9 +18,12 @@ import { useAdminAuth } from "../src/context/AdminAuthContext";
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/restaurants", label: "Restaurants", icon: Store },
+  { to: "/menu", label: "Menu", icon: UtensilsCrossed },
+  { to: "/banners", label: "Banners", icon: ImageIcon },
+  { to: "/analytics", label: "Analytics", icon: ChartLine },
   { to: "/orders", label: "Orders", icon: ListChecks },
   { to: "/users", label: "Users", icon: Users },
-  { to: "/restaurants", label: "Restaurants", icon: Store },
   { to: "/payments", label: "Payments", icon: CreditCard },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
@@ -217,27 +223,6 @@ export default function AdminNavbar() {
           </button>
         </div>
       </div>
-
-      <nav className="mt-4 hidden flex-wrap gap-2 md:flex">
-        {links.map((link) => {
-          const active = isLinkActive(link.to);
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm transition ${
-                active
-                  ? "bg-orange-500 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-700"
-              }`}
-            >
-              <Icon size={14} />
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
       <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] md:hidden">
         <div className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white/96 p-1.5 shadow-[0_-6px_30px_rgba(17,24,39,0.18)] backdrop-blur">
           {links.map((link) => {

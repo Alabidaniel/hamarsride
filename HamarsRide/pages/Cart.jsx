@@ -90,23 +90,23 @@ const Cart = () => {
   const totalCount = cartItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] text-[#2f241b] flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <NavbarMain />
 
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 flex-1">
-        <section className="rounded-[1.5rem] border border-[#ddccb8] bg-[#fffdf9] px-5 py-6 shadow-sm sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#8e6b4c]">Step 2 of 3</p>
+        <section className="rounded-[1.5rem] border border-orange-200 bg-white px-5 py-6 shadow-sm sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-orange-600">Step 2 of 3</p>
           <h1 className="mt-3 text-2xl font-semibold sm:text-3xl">Review your cart</h1>
-          <p className="mt-2 text-sm text-[#6f5a48]">
+          <p className="mt-2 text-sm text-gray-600">
             Confirm quantities, then continue to checkout and payment.
           </p>
 
           <div className="mt-5 grid gap-2 text-sm sm:grid-cols-3">
-            <div className="rounded-xl border border-[#e5d6c3] bg-[#f6efe6] px-3 py-2">1. Pick items</div>
-            <div className="rounded-xl border border-[#8a684d] bg-[#f1e7db] px-3 py-2 font-medium text-[#7d5b43]">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">1. Pick items</div>
+            <div className="rounded-xl border border-orange-500 bg-orange-100 px-3 py-2 font-medium text-orange-800">
               2. Review cart
             </div>
-            <div className="rounded-xl border border-[#e5d6c3] bg-[#f6efe6] px-3 py-2">3. Checkout & pay</div>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">3. Checkout & pay</div>
           </div>
         </section>
 
@@ -117,29 +117,29 @@ const Cart = () => {
         ) : null}
 
         {isLoading ? (
-          <div className="mt-5 bg-[#fffdf9] rounded-2xl border border-[#e2d3c1] p-8 sm:p-16 text-center text-sm text-[#7d6a59]">
+          <div className="mt-5 bg-white rounded-2xl border border-orange-200 p-8 sm:p-16 text-center text-sm text-gray-500">
             Loading cart...
           </div>
         ) : cartItems.length === 0 ? (
-          <div className="mt-5 bg-[#fffdf9] rounded-2xl border border-[#e2d3c1] p-8 sm:p-16 text-center">
+          <div className="mt-5 bg-white rounded-2xl border border-orange-200 p-8 sm:p-16 text-center">
             <h3 className="text-xl font-semibold mb-2">Your cart is empty</h3>
-            <p className="text-[#6f5a48] mb-6">Start with a restaurant and add your first item.</p>
+            <p className="text-gray-600 mb-6">Start with a restaurant and add your first item.</p>
             <button
               onClick={() => navigate("/restaurants")}
-              className="bg-[#8a684d] text-[#fffaf4] px-6 py-3 rounded-xl hover:bg-[#76563f] transition"
+              className="bg-orange-500 text-white px-6 py-3 rounded-xl hover:bg-orange-600 transition"
             >
               Browse Restaurants
             </button>
           </div>
         ) : (
           <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            <section className="lg:col-span-2 bg-[#fffdf9] rounded-2xl shadow-sm border border-[#e2d3c1] p-5 sm:p-6">
+            <section className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-orange-200 p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold">Cart items ({totalCount})</h2>
                 <button
                   type="button"
                   onClick={() => navigate("/restaurants")}
-                  className="rounded-full border border-[#ddccb8] bg-[#faf5ee] px-3 py-1.5 text-xs font-medium text-[#745e4b]"
+                  className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700 hover:bg-orange-100 transition"
                 >
                   Add more items
                 </button>
@@ -149,7 +149,7 @@ const Cart = () => {
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex flex-col gap-4 rounded-xl border border-[#eadfce] bg-[#faf5ee] p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-4 rounded-xl border border-orange-200 bg-orange-50 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                       {item.image ? (
@@ -159,22 +159,22 @@ const Cart = () => {
                           className="h-14 w-14 rounded-xl object-cover"
                         />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#876347] to-[#c7a17f] text-xs font-semibold tracking-[0.2em] text-[#fffaf4]">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-300 text-xs font-semibold tracking-[0.2em] text-white">
                           {getInitials(item.name)}
                         </div>
                       )}
 
                       <div className="min-w-0">
                         <h3 className="break-words font-semibold">{item.name}</h3>
-                        <p className="text-sm text-[#6f5a48]">N{item.price.toLocaleString()} each</p>
+                        <p className="text-sm text-gray-600">N{item.price.toLocaleString()} each</p>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-3 self-stretch sm:self-auto">
-                      <div className="flex items-center rounded-xl border border-[#ddccb8] overflow-hidden">
+                      <div className="flex items-center rounded-xl border border-orange-200 overflow-hidden bg-white">
                         <button
                           onClick={() => decreaseQty(item)}
-                          className="px-3 py-2.5 text-[#5a4636] hover:bg-[#f3e8db] disabled:opacity-60"
+                          className="px-3 py-2.5 text-orange-700 hover:bg-orange-50 disabled:opacity-60 transition"
                           disabled={updatingItemId === item.id || item.quantity <= 0}
                           aria-label={`Decrease ${item.name}`}
                         >
@@ -183,7 +183,7 @@ const Cart = () => {
                         <span className="px-3 text-sm font-medium">{item.quantity}</span>
                         <button
                           onClick={() => increaseQty(item)}
-                          className="px-3 py-2.5 text-[#5a4636] hover:bg-[#f3e8db] disabled:opacity-60"
+                          className="px-3 py-2.5 text-orange-700 hover:bg-orange-50 disabled:opacity-60 transition"
                           disabled={updatingItemId === item.id}
                           aria-label={`Increase ${item.name}`}
                         >
@@ -193,7 +193,7 @@ const Cart = () => {
 
                       <button
                         onClick={() => removeItem(item)}
-                        className="rounded-lg border border-[#ddccb8] p-2 text-[#7f6450] hover:bg-[#f3e8db] transition disabled:opacity-60"
+                        className="rounded-lg border border-orange-200 bg-white p-2 text-orange-700 hover:bg-orange-50 transition disabled:opacity-60"
                         disabled={updatingItemId === item.id}
                         aria-label={`Remove ${item.name}`}
                       >
@@ -205,7 +205,7 @@ const Cart = () => {
               </div>
             </section>
 
-            <aside className="bg-[#fffdf9] rounded-2xl shadow-sm border border-[#e2d3c1] p-5 sm:p-6 h-fit">
+            <aside className="bg-white rounded-2xl shadow-sm border border-orange-200 p-5 sm:p-6 h-fit">
               <h3 className="text-lg font-semibold">Order summary</h3>
 
               <div className="mt-4 space-y-3 text-sm">
@@ -219,24 +219,24 @@ const Cart = () => {
                   <span>N{(cartItems.length ? deliveryFee : 0).toLocaleString()}</span>
                 </div>
 
-                <hr className="border-[#e5d6c4]" />
+                <hr className="border-orange-200" />
 
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-[#6d573f]">N{total.toLocaleString()}</span>
+                  <span className="text-orange-700">N{total.toLocaleString()}</span>
                 </div>
               </div>
 
               <button
                 onClick={() => navigate("/Checkout")}
-                className="w-full mt-6 bg-[#8a684d] text-[#fffaf4] py-3 rounded-xl hover:bg-[#76563f] transition font-semibold"
+                className="w-full mt-6 bg-orange-500 text-white py-3 rounded-xl hover:bg-orange-600 transition font-semibold"
               >
                 Continue to Checkout
               </button>
 
               <button
                 onClick={() => navigate("/restaurants")}
-                className="w-full mt-2 border border-[#ddccb8] bg-[#faf5ee] text-[#6f5a48] py-3 rounded-xl transition hover:border-[#c1ab95]"
+                className="w-full mt-2 border border-orange-200 bg-orange-50 text-orange-700 py-3 rounded-xl transition hover:bg-orange-100"
               >
                 Back to Menu
               </button>

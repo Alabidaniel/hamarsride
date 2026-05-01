@@ -43,22 +43,22 @@ const buildReceiptHtml = (receipt) => {
           body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f1eb;
+            background: #ffffff;
             color: #1f2937;
           }
           .sheet {
             max-width: 820px;
             margin: 32px auto;
             background: #fff;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #fed7aa;
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
           }
           .header {
             padding: 28px;
-            background: linear-gradient(135deg, #7c5a42, #a07758);
-            color: #fffaf4;
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            color: #ffffff;
           }
           .header h1 { margin: 0; font-size: 28px; }
           .header p { margin: 8px 0 0; opacity: 0.9; }
@@ -70,8 +70,8 @@ const buildReceiptHtml = (receipt) => {
             margin-bottom: 24px;
           }
           .card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
             border-radius: 14px;
             padding: 16px;
           }
@@ -101,7 +101,7 @@ const buildReceiptHtml = (receipt) => {
           }
           th {
             text-align: left;
-            background: #f9fafb;
+            background: #fff7ed;
             color: #6b7280;
             font-weight: 600;
           }

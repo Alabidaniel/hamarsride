@@ -86,12 +86,12 @@ export default function RestaurantsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] text-[#2f241b] flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <NavbarMain />
 
       <div className="w-full max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 flex-1 pb-16">
-        <section className="mt-6 sm:mt-8 rounded-[2rem] border border-[#ded1bf] bg-gradient-to-br from-[#7c5a42] via-[#8e694d] to-[#b79272] px-6 py-8 text-[#fffaf4] shadow-[0_24px_80px_rgba(70,45,28,0.16)] sm:px-8 sm:py-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#f6e4cf]">
+        <section className="mt-6 sm:mt-8 rounded-[2rem] border border-orange-200 bg-gradient-to-br from-orange-700 via-orange-600 to-orange-300 px-6 py-8 text-white shadow-sm sm:px-8 sm:py-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-orange-50/90">
             Simpler Ordering
           </p>
           <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight sm:text-4xl">
@@ -109,8 +109,8 @@ export default function RestaurantsPage() {
             onClick={() => navigate("/restaurants")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition ${
               !isShopsPage
-                ? "bg-[#7c5a42] text-[#fffaf4]"
-                : "bg-[#fffdf9] text-[#5b4636] border border-[#e0d2c0]"
+                ? "bg-orange-600 text-white"
+                : "bg-white text-gray-700 border border-orange-200 hover:bg-orange-50"
             }`}
           >
             Restaurants
@@ -119,18 +119,18 @@ export default function RestaurantsPage() {
             onClick={() => navigate("/shops")}
             className={`px-4 py-2 rounded-full text-sm font-medium transition ${
               isShopsPage
-                ? "bg-[#7c5a42] text-[#fffaf4]"
-                : "bg-[#fffdf9] text-[#5b4636] border border-[#e0d2c0]"
+                ? "bg-orange-600 text-white"
+                : "bg-white text-gray-700 border border-orange-200 hover:bg-orange-50"
             }`}
           >
             Shops
           </button>
         </div>
 
-        <section className="mt-5 rounded-[1.5rem] border border-[#e0d2c0] bg-[#fffdf9] p-4 shadow-sm sm:p-5">
+        <section className="mt-5 rounded-[1.5rem] border border-orange-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
-            <div className="flex items-center gap-3 rounded-xl border border-[#e0d2c0] bg-[#faf5ee] px-4 py-3">
-              <Search size={18} className="text-[#8c735b]" />
+            <div className="flex items-center gap-3 rounded-xl border border-orange-200 bg-white px-4 py-3">
+              <Search size={18} className="text-orange-600" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -139,7 +139,7 @@ export default function RestaurantsPage() {
               />
             </div>
 
-            <label className="flex items-center gap-2 rounded-xl border border-[#e0d2c0] px-4 py-3 text-sm text-[#5b4636]">
+            <label className="flex items-center gap-2 rounded-xl border border-orange-200 px-4 py-3 text-sm text-gray-700 bg-white">
               <input
                 type="checkbox"
                 className="accent-orange-600"
@@ -152,7 +152,7 @@ export default function RestaurantsPage() {
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value)}
-              className="rounded-xl border border-[#e0d2c0] bg-[#faf5ee] px-4 py-3 text-sm text-[#5b4636] outline-none"
+              className="rounded-xl border border-orange-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none"
             >
               <option value="recommended">Sort: Recommended</option>
               <option value="rating">Sort: Highest rated</option>
@@ -168,7 +168,7 @@ export default function RestaurantsPage() {
                   key={value}
                   type="button"
                   onClick={() => setQuery(value)}
-                  className="rounded-full border border-[#ddccb8] bg-[#faf5ee] px-3 py-1.5 text-xs text-[#745e4b] transition hover:border-[#c2ab95]"
+                  className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs text-orange-700 transition hover:bg-orange-50"
                 >
                   {value}
                 </button>
@@ -177,7 +177,7 @@ export default function RestaurantsPage() {
           ) : null}
         </section>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-[#6f5a48]">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600">
           <p>
             {resultCount} {resultCount === 1 ? singularLabel : businessLabel.toLowerCase()} found
           </p>
@@ -185,7 +185,7 @@ export default function RestaurantsPage() {
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-full border border-[#dccab5] bg-[#faf5ee] px-3 py-1.5 text-xs font-medium transition hover:border-[#c3ad97]"
+              className="rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-medium transition hover:bg-orange-50"
             >
               Clear filters
             </button>
@@ -197,7 +197,7 @@ export default function RestaurantsPage() {
           {isLoading ? (
             <div className="col-span-full text-sm text-gray-500">Loading {businessType}s...</div>
           ) : sortedList.length === 0 ? (
-            <div className="col-span-full rounded-2xl border border-[#e0d2c0] bg-[#fffdf9] p-6 text-sm text-[#7d6a59]">
+            <div className="col-span-full rounded-2xl border border-orange-200 bg-white p-6 text-sm text-gray-600">
               No {businessType}s found. Try changing your filters.
             </div>
           ) : null}
@@ -207,18 +207,18 @@ export default function RestaurantsPage() {
               key={restaurant.id}
               type="button"
               onClick={() => navigate(`${detailsBasePath}/${restaurant.id}`)}
-              className="group flex h-full flex-col rounded-[1.6rem] border border-[#e5d7c7] bg-[#fffdf9] p-5 text-left shadow-[0_16px_50px_rgba(72,52,33,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(72,52,33,0.13)]"
+              className="group flex h-full flex-col rounded-[1.6rem] border border-orange-200 bg-white p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#876347] via-[#a07758] to-[#ccb090] text-sm font-semibold tracking-[0.25em] text-[#fffaf4] shadow-lg">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-700 via-orange-600 to-orange-300 text-sm font-semibold tracking-[0.25em] text-white shadow-sm">
                     {getInitials(restaurant.name)}
                   </div>
                   <div className="min-w-0">
-                    <h2 className="line-clamp-2 text-base font-semibold leading-snug text-[#2f241b]">
+                    <h2 className="line-clamp-2 text-base font-semibold leading-snug text-gray-900">
                       {restaurant.name}
                     </h2>
-                    <p className="mt-1 text-xs text-[#7a6654]">
+                    <p className="mt-1 text-xs text-gray-500">
                       {isShopsPage ? "Shop" : "Restaurant"}
                     </p>
                   </div>
@@ -226,31 +226,31 @@ export default function RestaurantsPage() {
 
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
-                    restaurant.open ? "bg-[#eef5ec] text-[#58704e]" : "bg-[#f1ece6] text-[#857466]"
+                    restaurant.open ? "bg-orange-50 text-orange-700 border border-orange-200" : "bg-gray-100 text-gray-600"
                   }`}
                 >
                   {restaurant.open ? "Open" : "Closed"}
                 </span>
               </div>
 
-              <div className="mt-5 rounded-[1.2rem] border border-[#eee3d5] bg-[#faf5ee] p-3.5">
-                <div className="flex flex-wrap items-center gap-3 text-sm text-[#746150]">
+              <div className="mt-5 rounded-[1.2rem] border border-orange-200 bg-orange-50/40 p-3.5">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-700">
                   <div className="flex items-center gap-1">
-                    <Star size={14} className="text-[#b78858]" />
-                    <span className="font-medium text-[#2f241b]">{restaurant.rating || "New"}</span>
+                    <Star size={14} className="text-orange-500" />
+                    <span className="font-medium text-gray-900">{restaurant.rating || "New"}</span>
                   </div>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#d3beaa]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-orange-200" />
                   <span className="flex items-center gap-1">
                     <Clock3 size={14} />
                     {restaurant.time || "Fast delivery"}
                   </span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#d3beaa]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-orange-200" />
                   <span>Delivery {restaurant.fee || "N/A"}</span>
                 </div>
               </div>
 
               <div className="mt-auto pt-4">
-                <span className="inline-flex items-center rounded-full bg-[#7d5b43] px-4 py-2 text-xs font-semibold tracking-[0.08em] text-[#fffaf4] transition group-hover:bg-[#6f503c]">
+                <span className="inline-flex items-center rounded-full bg-orange-600 px-4 py-2 text-xs font-semibold tracking-[0.08em] text-white transition group-hover:bg-orange-700">
                   {isShopsPage ? "Open catalog" : "Open menu"}
                 </span>
               </div>

@@ -23,9 +23,9 @@ const statusLabel = {
 
 const statusClass = {
   pending: "bg-gray-100 text-gray-700",
-  accepted: "bg-blue-100 text-blue-700",
+  accepted: "bg-orange-100 text-orange-700",
   processing: "bg-orange-100 text-orange-700",
-  picked_up: "bg-amber-100 text-amber-700",
+  picked_up: "bg-orange-100 text-orange-700",
   delivered: "bg-green-100 text-green-700",
   rejected: "bg-red-100 text-red-700",
   cancelled: "bg-red-100 text-red-700",
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         onClick={() => updateOrderStatus(order.id, "accepted")}
-                        className="px-3 py-2 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-60"
+                        className="px-3 py-2 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition disabled:opacity-60"
                         disabled={updatingId === order.id}
                       >
                         Accept
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
                       </button>
                       <button
                         onClick={() => updateOrderStatus(order.id, "picked_up")}
-                        className="px-3 py-2 text-xs rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition disabled:opacity-60"
+                        className="px-3 py-2 text-xs rounded-lg bg-orange-600 text-white hover:bg-orange-700 transition disabled:opacity-60"
                         disabled={updatingId === order.id}
                       >
                         Picked Up

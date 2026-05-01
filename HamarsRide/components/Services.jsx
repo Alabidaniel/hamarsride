@@ -25,16 +25,16 @@ const services = [
 
 export default function Services() {
   return (
-    <section className="bg-[#f6f0e7] px-4 py-18 sm:px-6 lg:px-8">
+    <section className="bg-white px-4 py-18 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#8b6748]">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-orange-600">
             Services
           </p>
-          <h2 className="mt-3 text-3xl font-bold text-[#2f241b] sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold text-gray-900 sm:text-4xl">
             Everything you need delivered in one smooth flow
           </h2>
-          <p className="mt-4 text-base leading-7 text-[#72604f]">
+          <p className="mt-4 text-base leading-7 text-gray-600">
             HamarsRide brings food ordering, essentials shopping, and rider dispatch into one dependable customer experience.
           </p>
         </div>
@@ -43,13 +43,13 @@ export default function Services() {
           {services.map(({ title, description, icon: Icon }) => (
             <article
               key={title}
-              className="rounded-3xl border border-[#e5d7c7] bg-gradient-to-br from-[#fbf7f1] to-[#fffdf9] p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="rounded-3xl border border-orange-200 bg-orange-50/40 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#8a684d] text-[#fffaf4]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-600 text-white">
                 <Icon size={24} />
               </div>
-              <h3 className="mt-5 text-xl font-semibold text-[#2f241b]">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#72604f]">{description}</p>
+              <h3 className="mt-5 text-xl font-semibold text-gray-900">{title}</h3>
+              <p className="mt-3 text-sm leading-6 text-gray-600">{description}</p>
             </article>
           ))}
         </div>

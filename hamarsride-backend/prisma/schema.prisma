@@ -1,4 +1,7 @@
-// Prisma schema for HamarsRide
+/**
+ * HamarsRide Production Prisma Schema
+ * Enhanced with audit logging, rider system, banners, promotions, and all required fields
+ */
 
 generator client {
   provider = "prisma-client-js"
@@ -8,6 +11,10 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+// ============================================
+// ENUMS
+// ============================================
 
 enum UserRole {
   customer
@@ -20,65 +27,6 @@ enum BusinessType {
   shop
 }
 
-model User {
-  id            String         @id @default(cuid())
-  firebaseUid   String         @unique
-  name          String
-  email         String         @unique
-  phone         String?
-  altPhone      String?
-  dateOfBirth   DateTime?
-  gender        String?
-  photoUrl      String?
-  role          UserRole       @default(customer)
-  createdAt     DateTime       @default(now())
-  addresses     Address[]
-  orders        Order[]
-  cartItems     CartItem[]
-  notifications Notification[]
-  payments     Payment[]
-  receipts      Receipt[]
-}
-
-model Address {
-  id        String   @id @default(cuid())
-  userId    String
-  label     String
-  details   String
-  notes     String?
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-model Restaurant {
-  id        String     @id @default(cuid())
-  name      String
-  type      BusinessType @default(restaurant)
-  image     String?
-  rating    Float?
-  time      String?
-  fee       String?
-  open      Boolean    @default(true)
-  createdAt DateTime   @default(now())
-  menuItems MenuItem[]
-
-  @@index([type])
-}
-
-model MenuItem {
-  id           String   @id @default(cuid())
-  restaurantId String
-  name         String
-  description  String? @db.Text
-  price        Int
-  image        String?
-
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-  cartItems    CartItem[]
-}
-
 enum OrderStatus {
   pending
   accepted
@@ -89,34 +37,213 @@ enum OrderStatus {
   cancelled
 }
 
-model Order {
-  id          String      @id @default(cuid())
-  userId      String
-  status      OrderStatus @default(pending)
-  address     String
-  instruction String?
-  rejectionReason String? @db.Text
-  subtotal    Int
-  deliveryFee Int
-  total       Int
-  pickup      String?
-  dropoff     String?
-  createdAt   DateTime    @default(now())
+enum PaymentStatus {
+  submitted
+  verified
+  rejected
+}
 
-  user  User        @relation(fields: [userId], references: [id])
-  items OrderItem[]
-  payments Payment[]
-  receipts Receipt[]
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  APPROVE
+  REJECT
+  ASSIGN
+  TOGGLE
+  UPLOAD
+}
+
+// ============================================
+// CORE MODELS
+// ============================================
+
+model User {
+  id              String    @id @default(cuid())
+  firebaseUid     String    @unique
+  name           String
+  email          String    @unique
+  phone          String?
+  altPhone       String?
+  dateOfBirth    DateTime?
+  gender         String?
+  photoUrl       String?
+  role           UserRole  @default(customer)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastLogin      DateTime?
+
+  // Relations
+  addresses      Address[]
+  orders        Order[]
+  cartItems     CartItem[]
+  notifications Notification[]
+  payments     Payment[]
+  receipts     Receipt[]
+  promoCodeUsages PromoCodeUsage[]
+
+  // Rider-specific
+  riderOrders    Order[]   @relation("RiderOrders")
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([lastLogin])
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String
+  details     String
+  notes       String?
+  isDefault   Boolean  @default(false)
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isDefault])
+}
+
+model Restaurant {
+  id                  String       @id @default(cuid())
+  name                String
+  type                BusinessType @default(restaurant)
+  description         String?      @db.Text
+  descriptionShort    String?      @db.VarChar(500)
+  image              String?
+  rating             Float?
+  time               String?
+  fee                String?
+  open               Boolean     @default(true)
+  isActive           Boolean     @default(true)
+  isFeatured         Boolean     @default(false)
+  baseDeliveryFee    Int          @default(100000) // in kobo
+  minimumOrder       Int          @default(0)
+  operatingHours    Json?
+  location          Json?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  // Relations
+  menuItems          MenuItem[]
+  banners          Banner[]
+
+  @@index([name])
+  @@index([type])
+  @@index([isFeatured])
+  @@index([isActive])
+  @@index([rating])
+}
+
+model MenuItem {
+  id                 String   @id @default(cuid())
+  restaurantId       String
+  name              String
+  description       String?  @db.Text
+  price             Int      // in kobo
+  image             String?
+  category          String?
+  isAvailable       Boolean  @default(true)
+  isFeatured        Boolean  @default(false)
+  isCombo           Boolean  @default(false)
+  discountPercentage Int      @default(0)
+  allergens        String?
+  calories         Int?
+  preparationTime  Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  restaurant        Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  cartItems       CartItem[]
+
+  @@index([restaurantId])
+  @@index([category])
+  @@index([isAvailable])
+  @@index([isFeatured])
+  @@index([name])
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  userId        String
+  menuItemId    String?
+  restaurantId String? // Track which restaurant this item is from
+  name         String
+  price        Int      // Snapshot price in kobo
+  image        String?
+  qty          Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  menuItem     MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([menuItemId])
+  @@index([restaurantId])
+}
+
+model Order {
+  id                    String       @id @default(cuid())
+  userId                String
+  restaurantId          String?
+  status               OrderStatus  @default(pending)
+  address              String
+  instruction          String?
+  rejectionReason      String?     @db.Text
+  subtotal            Int
+  deliveryFee         Int
+  total               Int
+  pickup              String?
+  dropoff             String?
+
+  // Timestamps
+  estimatedDeliveryTime Int?
+  actualDeliveryTime  DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  // Rider assignment
+  riderId              String?
+
+  // Feedback
+  rating              Int?
+  review             String?     @db.Text
+
+  // Relations
+  user               User        @relation(fields: [userId], references: [id])
+  rider              User?       @relation("RiderOrders", fields: [riderId], references: [id])
+  items              OrderItem[]
+  payments           Payment[]
+  receipts           Receipt[]
+  promoCodeUsed      PromoCodeUsage?
+
+  @@index([userId])
+  @@index([status])
+  @@index([restaurantId])
+  @@index([riderId])
+  @@index([createdAt])
 }
 
 model OrderItem {
-  id      String @id @default(cuid())
-  orderId String
-  name    String
-  qty     Int
-  price   Int
+  id        String  @id @default(cuid())
+  orderId   String
+  name     String
+  qty       Int
+  price     Int    // Snapshot price in kobo
 
-  order Order @relation(fields: [orderId], references: [id])
+  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 model Notification {
@@ -128,61 +255,140 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
-}
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model CartItem {
-  id         String   @id @default(cuid())
-  userId     String
-  menuItemId String?
-  name       String
-  price      Int
-  image      String?
-  qty        Int
-  createdAt  DateTime @default(now())
-
-  user     User     @relation(fields: [userId], references: [id])
-  menuItem MenuItem? @relation(fields: [menuItemId], references: [id])
-}
-
-
-
-
-
-
-enum PaymentStatus {
-  submitted
-  verified
-  rejected
+  @@index([userId])
+  @@index([isRead])
 }
 
 model Payment {
-  id         String        @id @default(cuid())
-  userId     String
-  orderId    String
-  amount     Int
-  receiptUrl String
-  status     PaymentStatus @default(submitted)
-  createdAt  DateTime      @default(now())
+  id           String        @id @default(cuid())
+  userId       String
+  orderId      String
+  amount      Int
+  receiptUrl  String
+  status      PaymentStatus @default(submitted)
+  verifiedAt   DateTime?
+  verifiedBy  String?
+  createdAt   DateTime    @default(now())
 
-  user  User  @relation(fields: [userId], references: [id])
-  order Order @relation(fields: [orderId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  order       Order        @relation(fields: [orderId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([orderId])
 }
 
 model Receipt {
-  id           String   @id @default(cuid())
-  orderId      String
-  userId       String
-  receiptNumber String  @unique
-  items        Json
-  subtotal     Int
-  deliveryFee  Int
-  total        Int
-  address      String
-  instruction  String?
-  generatedBy  String
-  createdAt    DateTime @default(now())
+  id              String   @id @default(cuid())
+  orderId         String
+  userId          String
+  receiptNumber   String   @unique
+  items          Json
+  subtotal       Int
+  deliveryFee    Int
+  total          Int
+  discount       Int      @default(0)
+  address        String
+  instruction   String?
+  generatedBy   String
+  createdAt     DateTime @default(now())
 
-  order Order @relation(fields: [orderId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
+  order          Order    @relation(fields: [orderId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@index([orderId])
+  @@index([userId])
+}
+
+// ============================================
+// PROMOTION MODELS
+// ============================================
+
+model PromoCode {
+  id                String    @id @default(cuid())
+  code              String    @unique
+  description       String?
+  discountType      String    @default("percentage") // percentage or fixed
+  discountValue    Int       // in kobo for fixed, percentage for percentage
+  minOrderAmount   Int       @default(0)
+  maxUsage        Int?
+  usedCount       Int       @default(0)
+  validFrom       DateTime?
+  validUntil     DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  usages         PromoCodeUsage[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([validUntil])
+}
+
+model PromoCodeUsage {
+  id          String    @id @default(cuid())
+  userId      String
+  orderId     String    @unique
+  promoCodeId String
+  discount    Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+  order       Order     @relation(fields: [orderId], references: [id])
+  promoCode  PromoCode @relation(fields: [promoCodeId], references: [id])
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([promoCodeId])
+}
+
+// ============================================
+// BANNER SYSTEM
+// ============================================
+
+model Banner {
+  id            String    @id @default(cuid())
+  title         String
+  subtitle      String?
+  imageUrl      String
+  restaurantId String?
+  linkUrl      String?
+  isActive     Boolean   @default(true)
+  startDate    DateTime?
+  endDate      DateTime?
+  priority    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
+
+  @@index([isActive])
+  @@index([priority])
+  @@index([startDate])
+}
+
+// ============================================
+// AUDIT LOG (CRITICAL)
+// ============================================
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  adminId     String?
+  action      AuditAction
+  entityType  String      // restaurant, menuItem, order, user, payment, etc.
+  entityId    String?
+  beforeData  Json?
+  afterData   Json?
+  details    String?     @db.Text
+  ipAddress   String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([adminId])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([action])
+  @@index([createdAt])
 }

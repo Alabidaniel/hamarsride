@@ -18,7 +18,6 @@ import OrderHistory from '../pages/OrderHistory';
 import SavedAddresses from '../pages/SavedAddresses';
 import DeliveredOrders from '../pages/DeliveredOrders';
 import Payment from '../pages/Payment';
-import AdminDashboard from '../pages/AdminDashboard';
 import ChangePassword from '../pages/ChangePassword';
 import PaymentSuccess from '../pages/PaymentSuccess';
 
@@ -47,8 +46,6 @@ export default function App() {
       <Route path='/delivered-orders' element={<DeliveredOrders />} />
       <Route path='/payment' element={<Payment />} />
       <Route path='/payment-success' element={<PaymentSuccess />} />
-      <Route path='/admin-dashboard' element={<AdminDashboard />} />
-    
     </Routes>
    </BrowserRouter>
   );

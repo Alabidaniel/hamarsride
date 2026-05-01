@@ -18,27 +18,27 @@ export default function Hero() {
         bg-no-repeat bg-cover bg-center
       "
       style={{
-        backgroundImage: `linear-gradient(90deg, rgba(78,56,39,0.74) 0%, rgba(122,89,61,0.48) 45%, rgba(246,240,231,0.16) 100%), url(${HeroImg})`,
+        backgroundImage: `linear-gradient(90deg, rgba(234,88,12,0.78) 0%, rgba(249,115,22,0.48) 45%, rgba(255,255,255,0.08) 100%), url(${HeroImg})`,
       }}
     >
       <Motion.div
         className="
-          text-[#fffaf4] 
+          text-white
           max-w-xl 
           text-center md:text-left
-          bg-[#fffaf4]/10 md:bg-[#fffaf4]/8
+          bg-white/10 md:bg-white/8
           backdrop-blur-md
           p-6 sm:p-8
           rounded-[1.75rem]
           border border-white/15
-          shadow-[0_20px_60px_rgba(52,35,22,0.12)]
+          shadow-xl
         "
         initial={{ opacity: 0, x: -36 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
       >
         <Motion.div
-          className="mb-4 inline-flex rounded-full border border-[#f1dfcb]/50 bg-[#fffaf4]/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-[#f4e4d1] backdrop-blur-sm"
+          className="mb-4 inline-flex rounded-full border border-orange-200/40 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-orange-50 backdrop-blur-sm"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.35 }}
@@ -67,7 +67,7 @@ export default function Hero() {
         <Motion.button
           onClick={() => navigate("/Login")}
           className="
-            bg-[#8a684d] hover:bg-[#76563f]
+            bg-orange-600 hover:bg-orange-700
             px-6 sm:px-8 py-3
             text-sm sm:text-base md:text-lg
             rounded-full font-semibold

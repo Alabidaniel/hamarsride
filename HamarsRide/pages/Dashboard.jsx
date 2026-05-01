@@ -34,16 +34,16 @@ export default function Dashboard() {
       <div
         key={business.id}
         onClick={() => navigate(`${basePath}/${business.id}`)}
-        className="w-56 sm:w-60 flex-shrink-0 rounded-[1.6rem] border border-[#e5d7c7] bg-[#fffdf9] p-4 shadow-[0_14px_35px_rgba(72,52,33,0.08)] cursor-pointer hover:shadow-[0_18px_42px_rgba(72,52,33,0.12)] transition"
+        className="w-56 sm:w-60 flex-shrink-0 rounded-[1.6rem] border border-orange-200 bg-white p-4 shadow-sm cursor-pointer hover:shadow-md transition"
       >
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#876347] to-[#c7a17f] text-sm font-semibold tracking-[0.2em] text-[#fffaf4]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-600 to-orange-300 text-sm font-semibold tracking-[0.2em] text-white">
           {getInitials(business.name)}
         </div>
 
         <h3 className="mt-4 font-semibold text-sm">{business.name}</h3>
 
         <p className="text-xs text-gray-500 flex items-center gap-1 mt-2">
-          <Star size={12} className="text-[#b78858]" />
+          <Star size={12} className="text-orange-500" />
           {business.rating} - {business.time}
         </p>
 
@@ -227,13 +227,13 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] p-4 text-[#2f241b] sm:p-6">
+    <div className="min-h-screen bg-white p-4 text-gray-900 sm:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <NavbarMain />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 shadow-[0_20px_60px_rgba(72,52,33,0.08)]">
+            <div className="rounded-[2rem] border border-orange-200 bg-white p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 shadow-sm">
               <div className="flex-1">
                 <h1 className="text-2xl sm:text-3xl font-bold leading-snug">
                   Ordering made easy <br />
@@ -243,25 +243,25 @@ export default function Dashboard() {
                 <div className="mt-4 sm:mt-6 flex flex-wrap gap-3">
                   <button
                     onClick={() => navigate("/restaurants")}
-                    className="bg-[#8a684d] text-[#fffaf4] px-6 py-3 rounded-full font-semibold shadow"
+                    className="bg-orange-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm hover:bg-orange-700 transition"
                   >
                     Browse Restaurants
                   </button>
                   <button
                     onClick={() => navigate("/shops")}
-                    className="bg-[#faf5ee] text-[#8b6748] border border-[#d8c8b5] px-6 py-3 rounded-full font-semibold"
+                    className="bg-white text-orange-700 border border-orange-200 px-6 py-3 rounded-full font-semibold hover:bg-orange-50 transition"
                   >
                     Browse Shops
                   </button>
                 </div>
 
                 <div className="mt-4 grid gap-2 text-sm sm:grid-cols-3 sm:max-w-[520px]">
-                  <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] px-3 py-2">1. Browse restaurants</div>
-                  <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] px-3 py-2">2. Add to cart</div>
-                  <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] px-3 py-2">3. Checkout</div>
+                  <div className="rounded-xl border border-orange-200 bg-orange-50/40 px-3 py-2">1. Browse restaurants</div>
+                  <div className="rounded-xl border border-orange-200 bg-orange-50/40 px-3 py-2">2. Add to cart</div>
+                  <div className="rounded-xl border border-orange-200 bg-orange-50/40 px-3 py-2">3. Checkout</div>
                 </div>
 
-                <div className="mt-4 sm:mt-5 bg-[#faf5ee] border border-[#e2d3c1] px-4 py-2 rounded-full w-full sm:w-[420px] flex items-center">
+                <div className="mt-4 sm:mt-5 bg-orange-50 border border-orange-200 px-4 py-2 rounded-full w-full sm:w-[420px] flex items-center">
                   <Search size={16} />
                   <input
                     value={heroSearch}
@@ -290,14 +290,14 @@ export default function Dashboard() {
                 <button
                   key={item}
                   onClick={() => navigate(`/restaurants?q=${encodeURIComponent(item)}`)}
-                  className="px-4 py-2 border border-[#d8c8b5] text-[#8b6748] bg-[#faf5ee] rounded-full text-sm"
+                  className="px-4 py-2 border border-orange-200 text-orange-700 bg-white rounded-full text-sm hover:bg-orange-50 transition"
                 >
                   {item}
                 </button>
               ))}
             </div>
 
-            <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-4 sm:p-6 shadow-[0_16px_45px_rgba(72,52,33,0.06)]">
+            <div className="rounded-[2rem] border border-orange-200 bg-white p-4 sm:p-6 shadow-sm">
               <h2 className="font-semibold mb-4 text-lg">Featured Restaurants</h2>
 
               <div className="flex gap-4 overflow-x-auto pb-2">
@@ -313,12 +313,12 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-4 sm:p-6 shadow-[0_16px_45px_rgba(72,52,33,0.06)]">
+            <div className="rounded-[2rem] border border-orange-200 bg-white p-4 sm:p-6 shadow-sm">
               <div className="flex items-center justify-between gap-4 mb-4">
                 <h2 className="font-semibold text-lg">Featured Shops</h2>
                 <button
                   onClick={() => navigate("/shops")}
-                  className="text-sm font-medium text-[#8b6748] hover:text-[#6f503c]"
+                  className="text-sm font-medium text-orange-700 hover:text-orange-800"
                 >
                   View all shops
                 </button>
@@ -337,7 +337,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-4 sm:p-6 overflow-x-auto shadow-[0_16px_45px_rgba(72,52,33,0.06)]">
+            <div className="rounded-[2rem] border border-orange-200 bg-white p-4 sm:p-6 overflow-x-auto shadow-sm">
               <h2 className="font-semibold mb-4 text-lg">Recent Orders</h2>
               {isLoadingOrders ? (
                 <div className="text-sm text-gray-500">Loading orders...</div>
@@ -381,7 +381,7 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-5 sm:p-6 shadow-[0_16px_45px_rgba(72,52,33,0.06)]">
+            <div className="rounded-[2rem] border border-orange-200 bg-white p-5 sm:p-6 shadow-sm">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-gray-900">Active Order Tracking</h3>
                 <span className={`text-xs font-medium px-3 py-1 rounded-full ${tracker.badgeClass}`}>
@@ -395,9 +395,9 @@ export default function Dashboard() {
                 </div>
               ) : null}
 
-              <div className="h-2 bg-gray-100 rounded-full relative mb-6">
+              <div className="h-2 bg-orange-100/60 rounded-full relative mb-6">
                 <div
-                  className="absolute left-0 top-0 h-2 bg-gradient-to-r from-[#8a684d] to-[#b89574] rounded-full transition-all"
+                  className="absolute left-0 top-0 h-2 bg-gradient-to-r from-orange-600 to-orange-300 rounded-full transition-all"
                   style={{ width: `${tracker.progress}%` }}
                 ></div>
               </div>
@@ -406,7 +406,7 @@ export default function Dashboard() {
                 {tracker.steps.map((label, index) => (
                   <span
                     key={label}
-                    className={tracker.currentIndex >= index ? "font-medium text-[#8b6748]" : ""}
+                    className={tracker.currentIndex >= index ? "font-medium text-orange-700" : ""}
                   >
                     {label}
                   </span>
@@ -422,7 +422,7 @@ export default function Dashboard() {
                   No active order right now. Place a new delivery to start tracking.
                 </div>
               ) : (
-                <div className="rounded-xl bg-[#f1e7db] border border-[#d8c8b5] px-4 py-3">
+                <div className="rounded-xl bg-orange-50 border border-orange-200 px-4 py-3">
                   <p className="text-sm font-semibold text-gray-900">Order #{activeOrder.id}</p>
                   <p className="text-xs text-gray-600 mt-1">
                     {((activeOrder.rejectionReason ? "rejected" : activeOrder.status) || "pending") === "delivered"
@@ -446,7 +446,7 @@ export default function Dashboard() {
 
             </div>
 
-            <div className="rounded-[2rem] border border-[#e5d7c7] bg-[#fffdf9] p-5 sm:p-6 shadow-[0_16px_45px_rgba(72,52,33,0.06)]">
+            <div className="rounded-[2rem] border border-orange-200 bg-white p-5 sm:p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -454,9 +454,9 @@ export default function Dashboard() {
                   <button
                     key={i}
                     onClick={() => navigate(item.path)}
-                    className="text-left bg-[#faf5ee] hover:bg-[#f1e7db] border border-[#e2d3c1] rounded-xl p-4 transition"
+                    className="text-left bg-white hover:bg-orange-50 border border-orange-200 rounded-xl p-4 transition"
                   >
-                    <item.icon className="text-[#8b6748] mb-2" size={18} />
+                    <item.icon className="text-orange-600 mb-2" size={18} />
                     <p className="text-sm font-semibold text-gray-900">{item.label}</p>
                     <p className="text-xs text-gray-500 mt-1">{item.subtitle}</p>
                   </button>

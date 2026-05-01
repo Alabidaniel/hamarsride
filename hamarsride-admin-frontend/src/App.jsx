@@ -8,6 +8,9 @@ import AdminUsers from "../pages/AdminUsers";
 import AdminRestaurants from "../pages/AdminRestaurants";
 import AdminPayments from "../pages/AdminPayments";
 import AdminSettings from "../pages/AdminSettings";
+import AdminMenuManagement from "../pages/AdminMenuManagement";
+import AdminBanners from "../pages/AdminBanners";
+import AdminAnalytics from "../pages/AdminAnalytics";
 
 export default function App() {
   return (
@@ -20,6 +23,9 @@ export default function App() {
           <Route path="/orders" element={<AdminOrders />} />
           <Route path="/users" element={<AdminUsers />} />
           <Route path="/restaurants" element={<AdminRestaurants />} />
+          <Route path="/menu" element={<AdminMenuManagement />} />
+          <Route path="/banners" element={<AdminBanners />} />
+          <Route path="/analytics" element={<AdminAnalytics />} />
           <Route path="/payments" element={<AdminPayments />} />
           <Route path="/settings" element={<AdminSettings />} />
         </Route>

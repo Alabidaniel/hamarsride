@@ -150,8 +150,8 @@ export default function NavbarMain() {
 
   return (
     <>
-    <div className="sticky top-0 z-30 border-b border-[#dccbb7] bg-[#f8f1e7] px-3 py-2 shadow-sm sm:px-6 sm:py-4 md:static md:z-auto">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 rounded-[1.4rem] border border-[#e2d3c1] bg-[#fffdf9] px-3 py-2 shadow-[0_12px_30px_rgba(73,53,34,0.05)] sm:gap-3 sm:rounded-[1.75rem] sm:px-6 sm:py-3">
+    <div className="sticky top-0 z-30 border-b border-orange-200 bg-white px-3 py-2 shadow-sm sm:px-6 sm:py-4 md:static md:z-auto">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 rounded-[1.4rem] border border-orange-200 bg-white px-3 py-2 shadow-sm sm:gap-3 sm:rounded-[1.75rem] sm:px-6 sm:py-3">
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
@@ -165,11 +165,11 @@ export default function NavbarMain() {
           />
         </button>
 
-        <div className="hidden w-full max-w-xs items-center rounded-full border border-[#e7dbce] bg-[#faf5ee] px-3 py-2 text-[#5d4939] sm:flex md:max-w-md lg:max-w-lg">
-          <Search size={18} className="text-[#8b735d]" />
+        <div className="hidden w-full max-w-xs items-center rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-gray-700 sm:flex md:max-w-md lg:max-w-lg">
+          <Search size={18} className="text-orange-600" />
           <input
             placeholder="Search restaurants, shops, or meals..."
-            className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-[#9b8673]"
+            className="ml-2 w-full bg-transparent text-sm outline-none placeholder:text-orange-300"
             onFocus={() => navigate("/restaurants")}
           />
         </div>
@@ -182,15 +182,15 @@ export default function NavbarMain() {
               onClick={() => navigate(item.path)}
               className={`relative hidden items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition md:inline-flex ${
                 item.active
-                  ? "border-[#8a684d] bg-[#f1e7db] text-[#8b6748]"
-                  : "border-[#e7dbce] bg-[#faf5ee] text-[#6d5847] hover:border-[#c9b5a2]"
+                  ? "border-orange-300 bg-orange-50 text-orange-700"
+                  : "border-orange-200 bg-white text-gray-700 hover:bg-orange-50"
               }`}
               aria-label={item.label}
             >
               <item.icon className="h-4 w-4" />
               <span>{item.label}</span>
               {item.key === "cart" && cartCount > 0 ? (
-                <span className="grid h-5 min-w-[20px] place-items-center rounded-full bg-[#8a684d] px-1 text-[10px] font-semibold text-[#fffaf4]">
+                <span className="grid h-5 min-w-[20px] place-items-center rounded-full bg-orange-600 px-1 text-[10px] font-semibold text-white">
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
               ) : null}
@@ -199,24 +199,24 @@ export default function NavbarMain() {
 
           <button
             onClick={() => navigate("/notifications")}
-            className="relative rounded-full p-2 text-[#6d5847] transition hover:bg-[#f5ece2] hover:text-[#8b6748]"
+            className="relative rounded-full p-2 text-gray-700 transition hover:bg-orange-50 hover:text-orange-700"
             aria-label="Open notifications"
           >
             <Bell className="h-5 w-5 sm:h-6 sm:w-6" />
             {unreadCount > 0 ? (
-              <span className="absolute -right-2 -top-2 min-w-[18px] h-[18px] rounded-full bg-[#b98b61] text-white text-[10px] px-1 grid place-items-center">
+              <span className="absolute -right-2 -top-2 min-w-[18px] h-[18px] rounded-full bg-orange-600 text-white text-[10px] px-1 grid place-items-center">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             ) : null}
           </button>
 
-          <p className="hidden text-sm text-[#5d4939] xl:block">
+          <p className="hidden text-sm text-gray-700 xl:block">
             {profile?.name ? `Welcome, ${profile.name.trim().split(/\s+/)[0]}!` : "Welcome!"}
           </p>
 
           <div
             onClick={() => navigate("/profile")}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-[#8a684d] text-sm text-[#fffaf4] sm:h-9 sm:w-9"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-orange-600 text-sm text-white sm:h-9 sm:w-9"
           >
             {profile?.photoUrl ? (
               <img
@@ -234,7 +234,7 @@ export default function NavbarMain() {
       </div>
     </div>
     <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] md:hidden">
-      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-[#ddccb8] bg-[#fffdf9]/96 p-1.5 shadow-[0_-6px_30px_rgba(73,53,34,0.14)] backdrop-blur">
+      <div className="grid grid-cols-4 gap-1 rounded-2xl border border-orange-200 bg-white/96 p-1.5 shadow-[0_-6px_30px_rgba(17,24,39,0.14)] backdrop-blur">
         {mobileTabs.map((tab) => (
           <button
             key={tab.key}
@@ -242,14 +242,14 @@ export default function NavbarMain() {
             onClick={() => navigate(tab.path)}
             className={`relative flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[11px] font-medium transition ${
               tab.active
-                ? "bg-[#8a684d] text-[#fffaf4]"
-                : "text-[#6d5847] hover:bg-[#f4ebdf]"
+                ? "bg-orange-600 text-white"
+                : "text-gray-700 hover:bg-orange-50"
             }`}
           >
             <tab.icon className="h-4 w-4" />
             <span className="mt-1">{tab.label}</span>
             {tab.badge ? (
-              <span className="absolute right-1.5 top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-[#b98b61] px-1 text-[9px] font-semibold text-white">
+              <span className="absolute right-1.5 top-1 grid h-4 min-w-[16px] place-items-center rounded-full bg-orange-600 px-1 text-[9px] font-semibold text-white">
                 {tab.badge}
               </span>
             ) : null}

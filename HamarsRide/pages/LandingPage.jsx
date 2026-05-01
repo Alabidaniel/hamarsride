@@ -18,7 +18,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div style={{ fontFamily: "Playfair Display" }} className="bg-[#f6f0e7] text-[#2f241b]">
+    <div style={{ fontFamily: "Playfair Display" }} className="bg-white text-gray-900">
       <Motion.div initial="hidden" animate="show" custom={0} variants={sectionVariants}>
         <Navbar />
       </Motion.div>

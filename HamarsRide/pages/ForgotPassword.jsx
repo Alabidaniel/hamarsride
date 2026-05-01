@@ -29,8 +29,8 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] flex flex-col">
-      <nav className="w-full px-6 py-4 flex justify-between items-center bg-[#fffdf9] shadow-sm border-b border-[#e2d3c1]">
+    <div className="min-h-screen bg-white flex flex-col">
+      <nav className="w-full px-6 py-4 flex justify-between items-center bg-white shadow-sm border-b border-orange-200">
         <a href="/" className="flex items-center">
           <img
             src={Logo}
@@ -41,19 +41,19 @@ export default function ForgotPassword() {
 
         <a
           href="/login"
-          className="text-sm font-medium text-[#6b5341] hover:text-[#8b6748] transition"
+          className="text-sm font-medium text-orange-700 hover:text-orange-800 transition"
         >
           Back to Login
         </a>
       </nav>
 
       <div className="flex-grow flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md bg-[#fffdf9] rounded-3xl border border-[#e2d3c1] shadow-xl p-8 md:p-10">
-          <h1 className="font-display text-4xl font-bold text-[#2f241b] mb-3">
+        <div className="w-full max-w-md bg-white rounded-3xl border border-orange-200 shadow-xl p-8 md:p-10">
+          <h1 className="font-display text-4xl font-bold text-gray-900 mb-3">
             Reset Your Password
           </h1>
 
-          <p className="text-[#72604f] mb-8 text-sm leading-relaxed">
+          <p className="text-gray-600 mb-8 text-sm leading-relaxed">
             Enter your email address and we'll send you a secure link to reset
             your password.
           </p>
@@ -94,16 +94,16 @@ export default function ForgotPassword() {
             </button>
           </form>
 
-            <p className="text-xs text-[#72604f] mt-5 text-center">
+          <p className="text-xs text-gray-600 mt-5 text-center">
             Check your spam folder if you don't see the email.
           </p>
 
-            <div className="my-6 border-t border-[#e2d3c1]" />
+          <div className="my-6 border-t border-orange-200" />
 
           <div className="text-center">
             <a
               href="/login"
-                className="text-sm font-medium text-[#8b6748] hover:underline"
+              className="text-sm font-medium text-orange-700 hover:underline"
             >
               Back to Login
             </a>
@@ -111,19 +111,19 @@ export default function ForgotPassword() {
         </div>
       </div>
 
-      <footer className="bg-[#fffdf9] border-t border-[#e2d3c1] py-6 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-[#72604f] space-y-3 md:space-y-0">
+      <footer className="bg-white border-t border-orange-200 py-6 px-4">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center text-sm text-gray-600 space-y-3 md:space-y-0">
           <div className="flex space-x-6">
-            <a href="#" className="hover:text-[#8b6748] transition">
+            <a href="#" className="hover:text-orange-700 transition">
               Contact
             </a>
-            <a href="#" className="hover:text-[#8b6748] transition">
+            <a href="#" className="hover:text-orange-700 transition">
               Terms
             </a>
-            <a href="#" className="hover:text-[#8b6748] transition">
+            <a href="#" className="hover:text-orange-700 transition">
               Instagram
             </a>
-            <a href="#" className="hover:text-[#8b6748] transition">
+            <a href="#" className="hover:text-orange-700 transition">
               WhatsApp
             </a>
           </div>

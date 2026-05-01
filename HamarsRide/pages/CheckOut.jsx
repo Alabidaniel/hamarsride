@@ -93,21 +93,21 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] text-[#2f241b] flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <NavbarMain />
 
       <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1">
-        <section className="rounded-[1.5rem] border border-[#ddccb8] bg-[#fffdf9] px-5 py-6 shadow-sm sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#8e6b4c]">Step 3 of 3</p>
+        <section className="rounded-[1.5rem] border border-orange-200 bg-white px-5 py-6 shadow-sm sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-orange-600">Step 3 of 3</p>
           <h1 className="mt-3 text-2xl font-semibold sm:text-3xl">Checkout details</h1>
-          <p className="mt-2 text-sm text-[#6f5a48]">
+          <p className="mt-2 text-sm text-gray-600">
             Pick where to deliver, add optional notes, then continue to payment.
           </p>
 
           <div className="mt-5 grid gap-2 text-sm sm:grid-cols-3">
-            <div className="rounded-xl border border-[#e5d6c3] bg-[#f6efe6] px-3 py-2">1. Pick items</div>
-            <div className="rounded-xl border border-[#e5d6c3] bg-[#f6efe6] px-3 py-2">2. Review cart</div>
-            <div className="rounded-xl border border-[#8a684d] bg-[#f1e7db] px-3 py-2 font-medium text-[#7d5b43]">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">1. Pick items</div>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">2. Review cart</div>
+            <div className="rounded-xl border border-orange-500 bg-orange-100 px-3 py-2 font-medium text-orange-800">
               3. Checkout & pay
             </div>
           </div>
@@ -126,24 +126,26 @@ const Checkout = () => {
         ) : null}
 
         {isLoading ? (
-          <div className="mt-5 bg-[#fffdf9] rounded-xl p-6 shadow-sm text-[#7d6a59]">Loading checkout...</div>
+          <div className="mt-5 bg-white rounded-xl border border-orange-200 p-6 shadow-sm text-gray-500">
+            Loading checkout...
+          </div>
         ) : (
           <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <section className="bg-[#fffdf9] rounded-xl p-5 sm:p-6 shadow-sm border border-[#e2d3c1]">
+              <section className="bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-orange-200">
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="text-xl font-semibold">Delivery address</h2>
                   <button
                     type="button"
                     onClick={() => navigate("/add-address")}
-                    className="rounded-full border border-[#ddccb8] bg-[#faf5ee] px-3 py-1.5 text-xs font-medium text-[#745e4b]"
+                    className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-700 hover:bg-orange-100 transition"
                   >
                     Add new
                   </button>
                 </div>
 
                 {addresses.length === 0 ? (
-                  <div className="mt-4 rounded-xl border border-dashed border-[#d5c2ad] bg-[#faf5ee] p-4 text-sm text-[#6f5a48]">
+                  <div className="mt-4 rounded-xl border border-dashed border-orange-200 bg-orange-50 p-4 text-sm text-gray-600">
                     No saved address found. Add an address to continue.
                   </div>
                 ) : (
@@ -153,8 +155,8 @@ const Checkout = () => {
                         key={address.id}
                         className={`border rounded-lg p-4 cursor-pointer transition flex items-start gap-3 ${
                           selectedAddress === address.id
-                            ? "border-[#8a684d] bg-[#f1e7db]"
-                            : "border-[#e2d3c1] bg-white"
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-orange-200 bg-white"
                         }`}
                       >
                         <input
@@ -165,9 +167,9 @@ const Checkout = () => {
                         />
                         <div className="min-w-0">
                           <p className="break-words font-semibold">{address.label}</p>
-                          <p className="break-words text-[#6f5a48] text-sm">{address.details}</p>
+                          <p className="break-words text-gray-600 text-sm">{address.details}</p>
                           {address.isDefault ? (
-                            <span className="mt-2 inline-flex rounded-full bg-[#e8dacc] px-2 py-1 text-[11px] font-medium text-[#73553f]">
+                            <span className="mt-2 inline-flex rounded-full bg-orange-100 px-2 py-1 text-[11px] font-medium text-orange-800">
                               Default
                             </span>
                           ) : null}
@@ -178,9 +180,9 @@ const Checkout = () => {
                 )}
               </section>
 
-              <section className="bg-[#fffdf9] rounded-xl p-5 sm:p-6 shadow-sm border border-[#e2d3c1]">
+              <section className="bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-orange-200">
                 <h2 className="text-xl font-semibold">Delivery instructions (optional)</h2>
-                <p className="text-sm text-[#6f5a48] mt-2">
+                <p className="text-sm text-gray-600 mt-2">
                   Add notes like gate number, landmark, or food preference.
                 </p>
                 <textarea
@@ -188,22 +190,22 @@ const Checkout = () => {
                   onChange={(event) => setOrderInstruction(event.target.value)}
                   maxLength={300}
                   placeholder="Example: Call me at the gate. No onions please."
-                  className="mt-3 w-full min-h-[120px] border border-[#dbcab6] bg-[#faf5ee] rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="mt-3 w-full min-h-[120px] border border-orange-200 bg-white rounded-lg p-3 outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
-                <p className="text-xs text-[#7d6a59] mt-2">{orderInstruction.length}/300 characters</p>
+                <p className="text-xs text-gray-500 mt-2">{orderInstruction.length}/300 characters</p>
               </section>
             </div>
 
             <aside className="space-y-6">
-              <section className="bg-[#fffdf9] rounded-xl p-5 sm:p-6 shadow-sm border border-[#e2d3c1]">
+              <section className="bg-white rounded-xl p-5 sm:p-6 shadow-sm border border-orange-200">
                 <h2 className="text-xl font-semibold">Order summary</h2>
                 <div className="mt-4 space-y-2 text-sm">
                   {orderItems.length === 0 ? (
-                    <p className="text-[#6f5a48]">Your cart is empty.</p>
+                    <p className="text-gray-600">Your cart is empty.</p>
                   ) : (
                     orderItems.map((item, idx) => (
                       <div key={`${item.name}-${idx}`} className="flex items-start justify-between gap-3">
-                        <span className="min-w-0 break-words text-[#4c3b2f]">
+                        <span className="min-w-0 break-words text-gray-800">
                           {item.name} x{item.qty}
                         </span>
                         <span className="whitespace-nowrap">N{(item.price * item.qty).toLocaleString()}</span>
@@ -212,12 +214,12 @@ const Checkout = () => {
                   )}
                 </div>
 
-                <div className="border-t border-[#e5d7c5] mt-4 pt-4 space-y-2 text-sm">
-                  <div className="flex justify-between text-[#6f5a48]">
+                <div className="border-t border-orange-200 mt-4 pt-4 space-y-2 text-sm">
+                  <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
                     <span>N{subtotal.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-[#6f5a48]">
+                  <div className="flex justify-between text-gray-600">
                     <span>Delivery fee</span>
                     <span>N{(orderItems.length ? deliveryFee : 0).toLocaleString()}</span>
                   </div>
@@ -229,7 +231,7 @@ const Checkout = () => {
 
                 <button
                   onClick={continueToPayment}
-                  className="w-full mt-6 bg-[#8a684d] text-[#fffaf4] py-3 rounded-lg font-semibold hover:bg-[#76563f] transition disabled:opacity-60"
+                  className="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-60"
                   disabled={orderItems.length === 0 || addresses.length === 0}
                 >
                   Continue to Payment
@@ -237,7 +239,7 @@ const Checkout = () => {
 
                 <button
                   onClick={() => navigate("/cart")}
-                  className="w-full mt-2 border border-[#ddccb8] bg-[#faf5ee] text-[#6f5a48] py-3 rounded-lg transition hover:border-[#c1ab95]"
+                  className="w-full mt-2 border border-orange-200 bg-orange-50 text-orange-700 py-3 rounded-lg transition hover:bg-orange-100"
                 >
                   Back to Cart
                 </button>

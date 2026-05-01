@@ -196,16 +196,16 @@ export default function PaymentSuccess() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] text-[#2f241b] flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <NavbarMain />
 
       <main className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1">
-        <section className="rounded-[1.5rem] border border-[#ddccb8] bg-[#fffdf9] px-5 py-6 shadow-sm sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#8e6b4c]">Payment Status</p>
+        <section className="rounded-[1.5rem] border border-orange-200 bg-white px-5 py-6 shadow-sm sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.26em] text-orange-600">Payment Status</p>
           <h1 className="mt-3 text-2xl font-semibold sm:text-3xl">
             {showVerified ? "Payment successful" : "Payment verification in progress"}
           </h1>
-          <p className="mt-2 text-sm text-[#6f5a48]">
+          <p className="mt-2 text-sm text-gray-600">
             {showVerified
               ? "Your payment has been confirmed by admin."
               : "We are waiting for admin confirmation. This page updates automatically."}
@@ -218,16 +218,16 @@ export default function PaymentSuccess() {
           </div>
         ) : null}
 
-        <section className="mt-5 rounded-2xl border border-[#e2d3c1] bg-[#fffdf9] p-5 sm:p-6 shadow-sm">
+        <section className="mt-5 rounded-2xl border border-orange-200 bg-white p-5 sm:p-6 shadow-sm">
           {isLoading ? (
-            <div className="text-sm text-[#7d6a59]">Checking payment status...</div>
+            <div className="text-sm text-gray-500">Checking payment status...</div>
           ) : showPending ? (
-            <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] p-4">
-              <div className="flex items-center gap-2 text-[#7d5b43]">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4">
+              <div className="flex items-center gap-2 text-orange-700">
                 <Clock3 size={18} />
                 <p className="font-semibold">Awaiting admin confirmation</p>
               </div>
-              <p className="mt-2 text-sm text-[#6f5a48]">
+              <p className="mt-2 text-sm text-gray-600">
                 Your payment has been submitted successfully. Once admin verifies it, this page will switch to payment successful and show your downloadable receipt.
               </p>
             </div>
@@ -245,7 +245,7 @@ export default function PaymentSuccess() {
               <button
                 type="button"
                 onClick={goBackToPayment}
-                className="mt-4 rounded-xl bg-[#8a684d] px-4 py-2 text-sm font-semibold text-[#fffaf4] transition hover:bg-[#76563f]"
+                className="mt-4 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600"
               >
                 Upload New Receipt
               </button>
@@ -267,24 +267,24 @@ export default function PaymentSuccess() {
           ) : null}
 
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] p-4 text-sm">
-              <p className="text-[#7d6a59]">Order ID</p>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm">
+              <p className="text-gray-500">Order ID</p>
               <p className="mt-1 font-semibold break-words">
                 {payment?.orderId || tracking?.orderId || "-"}
               </p>
             </div>
-            <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] p-4 text-sm">
-              <p className="text-[#7d6a59]">Payment Status</p>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm">
+              <p className="text-gray-500">Payment Status</p>
               <p className="mt-1 font-semibold capitalize">{payment?.status || "submitted"}</p>
             </div>
-            <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] p-4 text-sm">
-              <p className="text-[#7d6a59]">Total Amount</p>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm">
+              <p className="text-gray-500">Total Amount</p>
               <p className="mt-1 font-semibold">
                 {formatCurrency(payment?.amount ?? tracking?.total ?? 0)}
               </p>
             </div>
-            <div className="rounded-xl border border-[#e2d3c1] bg-[#faf5ee] p-4 text-sm">
-              <p className="text-[#7d6a59]">Last Checked</p>
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm">
+              <p className="text-gray-500">Last Checked</p>
               <p className="mt-1 font-semibold">{lastCheckedAt ? formatDate(lastCheckedAt) : "-"}</p>
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function PaymentSuccess() {
               type="button"
               onClick={() => fetchStatus({ silent: true })}
               disabled={isRefreshing}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#ddccb8] bg-[#faf5ee] px-4 py-2 text-sm font-semibold text-[#6f5a48] transition hover:border-[#c1ab95] disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700 transition hover:bg-orange-100 disabled:opacity-60"
             >
               <RefreshCw size={15} className={isRefreshing ? "animate-spin" : ""} />
               Refresh Status
@@ -308,7 +308,7 @@ export default function PaymentSuccess() {
                   disabled={!receipt}
                   className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
                     receipt
-                      ? "bg-[#8a684d] text-[#fffaf4] hover:bg-[#76563f]"
+                      ? "bg-orange-500 text-white hover:bg-orange-600"
                       : "cursor-not-allowed bg-gray-200 text-gray-500"
                   }`}
                 >
@@ -321,7 +321,7 @@ export default function PaymentSuccess() {
                   disabled={!receipt}
                   className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
                     receipt
-                      ? "border-[#ddccb8] bg-[#faf5ee] text-[#6f5a48] hover:border-[#c1ab95]"
+                      ? "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
                       : "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500"
                   }`}
                 >
@@ -334,7 +334,7 @@ export default function PaymentSuccess() {
             <button
               type="button"
               onClick={() => navigate("/order-history")}
-              className="inline-flex items-center justify-center rounded-xl border border-[#ddccb8] bg-[#faf5ee] px-4 py-2 text-sm font-semibold text-[#6f5a48] transition hover:border-[#c1ab95]"
+              className="inline-flex items-center justify-center rounded-xl border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700 transition hover:bg-orange-100"
             >
               Go to Order History
             </button>

@@ -38,10 +38,10 @@ export default function Testimonials() {
           {testimonials.map((item) => (
             <article
               key={item.name}
-              className="rounded-3xl border border-gray-200 bg-gray-50 p-6 shadow-sm"
+              className="rounded-3xl border border-orange-200 bg-orange-50/40 p-6 shadow-sm"
             >
               <p className="text-base leading-7 text-gray-700">"{item.quote}"</p>
-              <div className="mt-6 border-t border-gray-200 pt-4">
+              <div className="mt-6 border-t border-orange-200 pt-4">
                 <h3 className="font-semibold text-gray-900">{item.name}</h3>
                 <p className="text-sm text-gray-500">{item.role}</p>
               </div>

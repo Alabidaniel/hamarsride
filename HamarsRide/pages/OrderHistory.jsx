@@ -124,7 +124,7 @@ export default function OrderHistory() {
                           <button
                             onClick={() => handleViewReceipt(item.id)}
                             disabled={loadingReceiptId === item.id}
-                            className="text-xs px-3 py-1 rounded-full font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:opacity-50"
+                            className="text-xs px-3 py-1 rounded-full font-medium bg-orange-100 text-orange-700 hover:bg-orange-200 disabled:opacity-50"
                           >
                             {loadingReceiptId === item.id ? "Loading..." : "View Receipt"}
                           </button>

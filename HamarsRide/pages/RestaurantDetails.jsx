@@ -268,9 +268,9 @@ export default function RestaurantDetails() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f6f0e7] text-[#2f241b]">
+      <div className="min-h-screen bg-white text-gray-900">
         <NavbarMain />
-        <div className="mx-auto max-w-6xl px-4 py-12 text-sm text-[#6f5a48]">Loading menu...</div>
+        <div className="mx-auto max-w-6xl px-4 py-12 text-sm text-gray-600">Loading menu...</div>
       </div>
     );
   }
@@ -282,11 +282,11 @@ export default function RestaurantDetails() {
   const emptyStateLabel = isShopsPage ? "Catalog coming soon." : "Menu coming soon.";
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f6f0e7] text-[#2f241b]">
+    <div className="flex min-h-screen flex-col bg-white text-gray-900">
       <NavbarMain />
 
       <div className="mx-auto flex-1 w-full max-w-6xl px-4 sm:px-6 lg:px-8 pb-32">
-        <section className="mt-6 rounded-[1.8rem] border border-[#ded1bf] bg-gradient-to-br from-[#7d5b43] via-[#916b4f] to-[#b89574] px-5 py-7 text-[#fffaf4] shadow-[0_30px_90px_rgba(70,45,28,0.16)] sm:px-8 sm:py-9">
+        <section className="mt-6 rounded-[1.8rem] border border-orange-200 bg-gradient-to-br from-orange-700 via-orange-600 to-orange-300 px-5 py-7 text-white shadow-sm sm:px-8 sm:py-9">
           <button
             type="button"
             onClick={() => navigate(isShopsPage ? "/shops" : "/restaurants")}
@@ -297,46 +297,46 @@ export default function RestaurantDetails() {
 
           <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 text-lg font-semibold tracking-[0.25em] text-[#fffaf4]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/15 text-lg font-semibold tracking-[0.25em] text-white">
                 {getInitials(restaurant.name)}
               </div>
               <h1 className="mt-4 break-words text-3xl font-semibold leading-tight sm:text-4xl">{restaurant.name}</h1>
-              <p className="mt-3 text-sm text-[#f8eee3]">
+              <p className="mt-3 text-sm text-orange-50/90">
                 Add items quickly, then use the sticky cart bar at the bottom to checkout.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm">
-                <div className="flex items-center gap-1 text-[#f6e4cf]">
-                  <Star size={14} className="text-[#f0c590]" />
+                <div className="flex items-center gap-1 text-orange-50/90">
+                  <Star size={14} className="text-orange-200" />
                   Rating
                 </div>
                 <p className="mt-1 text-base font-semibold">{restaurant.rating || "New"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm">
-                <div className="flex items-center gap-1 text-[#f6e4cf]">
-                  <Clock3 size={14} className="text-[#f0c590]" />
+                <div className="flex items-center gap-1 text-orange-50/90">
+                  <Clock3 size={14} className="text-orange-200" />
                   ETA
                 </div>
                 <p className="mt-1 text-base font-semibold">{restaurant.time || "Fast"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm">
-                <p className="text-[#f6e4cf]">Delivery Fee</p>
+                <p className="text-orange-50/90">Delivery Fee</p>
                 <p className="mt-1 text-base font-semibold">{restaurant.fee || "N/A"}</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm">
-                <p className="text-[#f6e4cf]">Status</p>
+                <p className="text-orange-50/90">Status</p>
                 <p className="mt-1 text-base font-semibold">{restaurant.open ? "Open" : "Closed"}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mt-6 rounded-[1.5rem] border border-[#e0d2c0] bg-[#fffdf9] p-4 shadow-sm sm:p-5">
+        <section className="mt-6 rounded-[1.5rem] border border-orange-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="flex items-center gap-3 rounded-xl border border-[#e0d2c0] bg-[#faf5ee] px-4 py-3">
-              <Search size={18} className="text-[#8c735b]" />
+            <div className="flex items-center gap-3 rounded-xl border border-orange-200 bg-white px-4 py-3">
+              <Search size={18} className="text-orange-600" />
               <input
                 value={menuSearch}
                 onChange={(event) => setMenuSearch(event.target.value)}
@@ -350,7 +350,7 @@ export default function RestaurantDetails() {
                 setMenuSearch("");
                 setSelectedCategory("All");
               }}
-              className="rounded-xl border border-[#ddccb8] bg-[#faf5ee] px-4 py-3 text-sm text-[#745e4b] transition hover:border-[#c2ab95]"
+              className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700 transition hover:bg-orange-100"
             >
               Reset
             </button>
@@ -366,8 +366,8 @@ export default function RestaurantDetails() {
                     onClick={() => setSelectedCategory(category)}
                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                       active
-                        ? "border-[#7d5b43] bg-[#7d5b43] text-[#fffaf4]"
-                        : "border-[#e1d3c3] bg-[#faf5ee] text-[#5b4636] hover:border-[#b89574]"
+                        ? "border-orange-500 bg-orange-500 text-white"
+                        : "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
                     }`}
                   >
                     {category}
@@ -380,17 +380,17 @@ export default function RestaurantDetails() {
 
         <div className="mt-6">
           {categoryEntries.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-[#e5d7c7] bg-[#fffdf9] p-8 text-center text-sm text-[#7d6a59] shadow-sm">
+            <div className="rounded-[1.5rem] border border-orange-200 bg-white p-8 text-center text-sm text-gray-500 shadow-sm">
               {emptyStateLabel}
             </div>
           ) : filteredCategoryEntries.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-[#e5d7c7] bg-[#fffdf9] p-8 text-center text-sm text-[#7d6a59] shadow-sm">
+            <div className="rounded-[1.5rem] border border-orange-200 bg-white p-8 text-center text-sm text-gray-500 shadow-sm">
               No menu items matched your search.
             </div>
           ) : (
             filteredCategoryEntries.map(([category, items]) => (
               <section key={category} className="mb-7 last:mb-0">
-                <h2 className="mb-3 text-xl font-semibold text-[#2f241b]">{category}</h2>
+                <h2 className="mb-3 text-xl font-semibold text-gray-900">{category}</h2>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   {items.map(({ itemName, variants }) => {
@@ -405,10 +405,10 @@ export default function RestaurantDetails() {
                     return (
                           <article
                             key={`${category}-${itemName}`}
-                            className="rounded-[1.3rem] border border-[#e5d7c7] bg-[#fffdf9] p-4 shadow-[0_14px_35px_rgba(72,52,33,0.06)]"
+                            className="rounded-[1.3rem] border border-orange-200 bg-white p-4 shadow-sm"
                           >
-                        <h3 className="break-words text-base font-semibold text-[#2f241b]">{itemName}</h3>
-                        <p className="mt-2 text-sm text-[#72604f]">{description}</p>
+                        <h3 className="break-words text-base font-semibold text-gray-900">{itemName}</h3>
+                        <p className="mt-2 text-sm text-gray-600">{description}</p>
 
                         <div className="mt-4 space-y-3">
                           {variants.map((variantEntry) => {
@@ -423,15 +423,15 @@ export default function RestaurantDetails() {
                             return (
                                 <div
                                   key={variantEntry.id}
-                                  className="flex flex-col gap-3 rounded-xl border border-[#eee2d4] bg-[#faf5ee] px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+                                  className="flex flex-col gap-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-3 sm:flex-row sm:items-center sm:justify-between"
                                 >
                                 <div className="min-w-0">
-                                  <p className="break-words text-sm font-medium text-[#3d3025]">
+                                  <p className="break-words text-sm font-medium text-gray-900">
                                     {showVariantLabel
                                       ? variantEntry.variant || itemName
                                       : "Standard option"}
                                   </p>
-                                  <p className="text-sm text-[#8b6748]">
+                                  <p className="text-sm text-orange-700">
                                     {variantEntry.price > 0
                                       ? `N${variantEntry.price.toLocaleString()}`
                                       : "Price on request"}
@@ -441,36 +441,36 @@ export default function RestaurantDetails() {
                                 {isOrderable ? (
                                   quantity > 0 ? (
                                     <div className="flex items-center gap-3">
-                                      <button
-                                        type="button"
-                                        onClick={() => removeFromCart(menuItem)}
-                                        disabled={isUpdatingItemId === variantEntry.id}
-                                        className="rounded-full bg-[#fffdf9] p-2.5 text-[#5b4636] shadow-sm disabled:opacity-60"
-                                      >
-                                        <Minus size={14} />
-                                      </button>
-                                      <span className="min-w-6 text-center font-medium">{quantity}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => removeFromCart(menuItem)}
+                                          disabled={isUpdatingItemId === variantEntry.id}
+                                          className="rounded-full border border-orange-200 bg-white p-2.5 text-orange-700 shadow-sm disabled:opacity-60"
+                                        >
+                                          <Minus size={14} />
+                                        </button>
+                                        <span className="min-w-6 text-center font-medium">{quantity}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => addToCart(menuItem)}
+                                          disabled={isUpdatingItemId === variantEntry.id}
+                                          className="rounded-full bg-orange-500 p-2.5 text-white shadow-sm hover:bg-orange-600 disabled:opacity-60 transition"
+                                        >
+                                          <Plus size={14} />
+                                        </button>
+                                      </div>
+                                    ) : (
                                       <button
                                         type="button"
                                         onClick={() => addToCart(menuItem)}
                                         disabled={isUpdatingItemId === variantEntry.id}
-                                        className="rounded-full bg-[#7d5b43] p-2.5 text-[#fffaf4] shadow-sm disabled:opacity-60"
+                                        className="rounded-full bg-orange-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-orange-600 disabled:opacity-60"
                                       >
-                                        <Plus size={14} />
+                                        {isUpdatingItemId === variantEntry.id ? "Adding..." : "Add"}
                                       </button>
-                                    </div>
+                                    )
                                   ) : (
-                                    <button
-                                      type="button"
-                                      onClick={() => addToCart(menuItem)}
-                                      disabled={isUpdatingItemId === variantEntry.id}
-                                      className="rounded-full bg-[#7d5b43] px-4 py-2 text-xs font-semibold text-[#fffaf4] transition hover:bg-[#6f503c] disabled:opacity-60"
-                                    >
-                                      {isUpdatingItemId === variantEntry.id ? "Adding..." : "Add"}
-                                    </button>
-                                  )
-                                ) : (
-                                  <span className="rounded-full border border-[#e3d4c3] bg-[#fffdf9] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#84705e]">
+                                  <span className="rounded-full border border-orange-200 bg-white px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-600">
                                     {restaurant.open ? "Info only" : "Closed"}
                                   </span>
                                 )}
@@ -489,7 +489,7 @@ export default function RestaurantDetails() {
       </div>
 
       {totalItems > 0 ? (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#d8c7b4] bg-[#7d5b43] px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-[#fffaf4] shadow-2xl">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-orange-600 bg-orange-500 px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white shadow-2xl">
           <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
             <span className="text-center text-sm font-medium sm:text-left sm:text-base">
               {totalItems} {totalItems === 1 ? "item" : "items"} in cart - N{totalPrice.toLocaleString()}
@@ -499,14 +499,14 @@ export default function RestaurantDetails() {
               <button
                 type="button"
                 onClick={() => navigate("/cart")}
-                className="w-full rounded-full border border-[#e8d8c6] bg-transparent px-4 py-2 text-sm font-semibold text-[#fffaf4] sm:w-auto"
+                className="w-full rounded-full border border-white/70 bg-transparent px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 transition sm:w-auto"
               >
                 View Cart
               </button>
               <button
                 type="button"
                 onClick={() => navigate("/Checkout")}
-                className="w-full rounded-full bg-[#f4e9db] px-4 py-2 text-sm font-semibold text-[#5b4636] sm:w-auto"
+                className="w-full rounded-full bg-white px-4 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-50 transition sm:w-auto"
               >
                 Checkout
               </button>
