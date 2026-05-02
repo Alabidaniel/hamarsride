@@ -12,7 +12,7 @@ export default function ReceiptModal({ receipt, onClose }) {
       minute: "2-digit",
     });
 
-  const formatCurrency = (amount) => `N${Number(amount || 0).toLocaleString()}`;
+  const formatCurrency = (amount) => `N${Number(amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;
 
   const escapeHtml = (value) =>
     String(value ?? "")

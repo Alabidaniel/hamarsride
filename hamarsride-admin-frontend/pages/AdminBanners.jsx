@@ -278,8 +278,8 @@ export default function AdminBanners() {
                     <td className="px-4 py-3 text-gray-700">{b.priority ?? 0}</td>
                     <td className="px-4 py-3 text-gray-700">
                       <div className="text-xs">
-                        <div>Start: {b.startDate ? new Date(b.startDate).toLocaleString() : "-"}</div>
-                        <div>End: {b.endDate ? new Date(b.endDate).toLocaleString() : "-"}</div>
+                        <div>Start: {b.startDate ? new Date(b.startDate).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) : "-"}</div>
+                        <div>End: {b.endDate ? new Date(b.endDate).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) : "-"}</div>
                       </div>
                     </td>
                     <td className="px-4 py-3">

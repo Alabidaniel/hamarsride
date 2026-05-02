@@ -11,7 +11,7 @@ const toKoboInt = (nairaValue) => {
 };
 
 const formatCurrency = (amountKobo) =>
-  `N${Number((amountKobo || 0) / 100).toLocaleString(undefined, {
+  `N${Number((amountKobo || 0) / 100000).toLocaleString('pt-BR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -137,7 +137,7 @@ export default function AdminMenuManagement() {
       description: item.description || "",
       category: item.category || "",
       image: item.image || "",
-      priceNaira: String(((item.price || 0) / 100).toFixed(2)),
+      priceNaira: String(((item.price || 0) / 100).toFixed(4)),
       discountPercentage: String(item.discountPercentage ?? 0),
       isAvailable: item.isAvailable !== false,
     });

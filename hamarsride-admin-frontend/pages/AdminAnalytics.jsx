@@ -95,9 +95,9 @@ export default function AdminAnalytics() {
             <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
               <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `N${Number(v).toLocaleString()}`} />
+              <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `N${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`} />
               <Tooltip
-                formatter={(value) => [`N${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}`, "Revenue"]}
+                formatter={(value) => [`N${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`, "Revenue"]}
                 labelFormatter={(label) => `Date: ${label}`}
               />
               <Line type="monotone" dataKey="revenue" stroke="#F97316" strokeWidth={2} dot={false} />

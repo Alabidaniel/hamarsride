@@ -14,7 +14,7 @@ const toKoboInt = (nairaValue) => {
 
 const toNairaString = (amountKobo) => {
   const n = Number(amountKobo || 0) / 100;
-  return Number.isFinite(n) ? String(n.toFixed(2)) : "0.00";
+  return Number.isFinite(n) ? String(n.toFixed(4)) : "0.00";
 };
 
 export default function AdminRestaurants() {

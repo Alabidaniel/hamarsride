@@ -8,10 +8,10 @@ const formatDateTime = (dateValue) => {
   if (!dateValue) return "-";
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString();
+  return date.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 };
 
-const formatCurrency = (amount) => `N${Number(amount || 0).toLocaleString()}`;
+const formatCurrency = (amount) => `N${Number(amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;
 
 const businessTypeLabel = (type) => (type === "shop" ? "Shop" : "Restaurant");
 
