@@ -11,7 +11,7 @@ const toKoboInt = (nairaValue) => {
 };
 
 const formatCurrency = (amountKobo) =>
-  `N${Number((amountKobo || 0) / 100000).toLocaleString('pt-BR', {
+  `N${Number((amountKobo || 0) / 100000).toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;

@@ -50,7 +50,7 @@ export default function AdminDashboard() {
           <p className="text-sm text-gray-500 mt-1">Live overview of orders, users, restaurants and payments.</p>
         </div>
         <div className="px-4 py-2 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
-          Revenue: N{Number(stats?.totalRevenue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+          Revenue: N{Number(stats?.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </div>
       </div>
 

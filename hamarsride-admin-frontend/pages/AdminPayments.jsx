@@ -79,7 +79,7 @@ export default function AdminPayments() {
               </div>
 
               <div className="text-sm text-gray-700 mt-3">
-                Amount: <span className="font-semibold">N{Number(payment.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</span>
+                Amount: <span className="font-semibold">N{Number(payment.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
